@@ -1,0 +1,25 @@
+{
+  "name": "trabalho---desenvolvimento-de-aplicacoes-ii",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Karen-silva842/Trabalho---Desenvolvimento-de-Aplicacoes-II.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Karen-silva842/Trabalho---Desenvolvimento-de-Aplicacoes-II/issues"
+  },
+  "homepage": "https://github.com/Karen-silva842/Trabalho---Desenvolvimento-de-Aplicacoes-II#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

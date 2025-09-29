@@ -1,0 +1,29 @@
+[
+  {
+    "id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+    "name": "Jefferson Martins",
+    "contact_email": "martinsferramentassc@gmail.com",
+    "user": "jefferson.presidente",
+    "pwd": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0_mock",
+    "level": "presidente",
+    "status": "on"
+  },
+  {
+    "id": "5d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e",
+    "name": "Karen Suelen da Silva",
+    "contact_email": "karensusilva@gmail.com",
+    "user": "karen.silva",
+    "pwd": "5d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e_mock",
+    "level": "admin",
+    "status": "on"
+  },
+  {
+    "id": "f0e9d8c7b6a51b2c3d4e5f6a7b8c9d0e1f2a3b4c",
+    "name": "Joao Vitor Ribeiro Warmling",
+    "contact_email": "joaowarmling8@gmail.com",
+    "user": "joao.vendedor",
+    "pwd": "f0e9d8c7b6a51b2c3d4e5f6a7b8c9d0e1f2a3b4c_mock",
+    "level": "vendedor",
+    "status": "on"
+  }
+]
