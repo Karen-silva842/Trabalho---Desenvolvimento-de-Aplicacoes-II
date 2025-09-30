@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Caminho para o arquivo de dados dos fornecedores
-const suppliersFilePath = path.join(__dirname, '..', 'data', 'supplier.json');
+const suppliersFilePath = path.join(__dirname, '..', 'data', 'suppliers.json');
 
 // --- Funções Auxiliares ---
 function readData() {
