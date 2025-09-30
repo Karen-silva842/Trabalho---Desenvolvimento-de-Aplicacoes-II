@@ -7,7 +7,8 @@ const swaggerUi = require('swagger-ui-express');
 
 // --- Importação de Rotas ---
 const usersRoutes = require('./routes/usersRoutes');
-const supplierRoutes = require('./routes/supplierRoutes');
+// CORREÇÃO AQUI: Adicionado "s" em suppliersRoutes
+const supplierRoutes = require('./routes/suppliersRoutes'); 
 
 // --- Documentação Swagger ---
 const swaggerDocument = {
@@ -51,7 +52,7 @@ const swaggerDocument = {
           }
         ],
         responses: {
-          '200': { description: 'Usuário(s) encontrado(s).' },
+          '200': { description: 'Usuário(s ) encontrado(s).' },
           '404': { description: 'Nenhum usuário encontrado.' }
         }
       }
@@ -169,6 +170,6 @@ app.get('/', (req, res) => {
 
 // --- Inicialização do Servidor ---
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
-  console.log(`Documentação Swagger em http://localhost:${port}/api-docs`);
+  console.log(`Servidor rodando em http://localhost:${port}` );
+  console.log(`Documentação Swagger em http://localhost:${port}/api-docs` );
 });

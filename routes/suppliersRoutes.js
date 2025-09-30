@@ -1,23 +1,11 @@
-// index.js (ou app.js)
-
-const express = require('express');
-const app = express();
-const port = 3000;
-
-// Importa as rotas
-const usersRoutes = require('./routes/usersRoutes');
-const supplierRoutes = require('./routes/supplierRoutes');
-
-// Middleware para processar JSON (necessário para POST/PUT)
-app.use(express.json());
-// routes/supplierRoutes.js
+// routes/suppliersRoutes.js
 
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 
-// Caminho para supplier.json
+// Caminho para o arquivo de dados dos fornecedores
 const suppliersFilePath = path.join(__dirname, '..', 'data', 'supplier.json');
 
 // --- Funções Auxiliares ---
@@ -35,7 +23,7 @@ function writeData(data) {
     try {
         fs.writeFileSync(suppliersFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
-        console.error("Erro ao escrever supplier.json:", error);
+        console.error("Erro ao escrever em supplier.json:", error);
     }
 }
 
@@ -71,7 +59,6 @@ router.get('/search', (req, res) => {
 router.get('/:id', (req, res) => {
     const suppliers = readData();
     const id = req.params.id;
-
     const supplier = suppliers.find(s => s.id === id);
 
     if (supplier) {
@@ -105,17 +92,13 @@ router.post('/', (req, res) => {
 
 // 5. PUT: Atualizar fornecedor por ID
 router.put('/:id', (req, res) => {
-    const suppliers = readData();
+    let suppliers = readData();
     const id = req.params.id;
     const updateData = req.body;
-
     const supplierIndex = suppliers.findIndex(s => s.id === id);
 
     if (supplierIndex !== -1) {
-        suppliers[supplierIndex] = {
-            ...suppliers[supplierIndex],
-            ...updateData
-        };
+        suppliers[supplierIndex] = { ...suppliers[supplierIndex], ...updateData };
         writeData(suppliers);
         return res.json(suppliers[supplierIndex]);
     }
@@ -125,9 +108,8 @@ router.put('/:id', (req, res) => {
 
 // 6. DELETE: Remover fornecedor por ID
 router.delete('/:id', (req, res) => {
-    const suppliers = readData();
+    let suppliers = readData();
     const id = req.params.id;
-
     const updatedSuppliers = suppliers.filter(s => s.id !== id);
 
     if (updatedSuppliers.length < suppliers.length) {
@@ -138,12 +120,5 @@ router.delete('/:id', (req, res) => {
     res.status(404).json({ message: 'Fornecedor não encontrado para remoção.' });
 });
 
+// Exporta o router para ser usado no index.js
 module.exports = router;
-
-// Monta as rotas
-app.use('/users', usersRoutes);
-app.use('/suppliers', supplierRoutes);
-
-app.listen(port, () => {
-  console.log(`API Central de Compras rodando em http://localhost:${port}`);
-});

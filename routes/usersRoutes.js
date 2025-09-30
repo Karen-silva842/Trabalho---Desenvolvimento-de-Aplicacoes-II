@@ -23,7 +23,7 @@ function writeData(data) {
     try {
         fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
-        console.error("Erro ao escrever users.json:", error);
+        console.error("Erro ao escrever em users.json:", error);
     }
 }
 
@@ -59,7 +59,6 @@ router.get('/search', (req, res) => {
 router.get('/:id', (req, res) => {
     const users = readData();
     const id = req.params.id;
-
     const user = users.find(u => u.id === id);
 
     if (user) {
@@ -93,17 +92,13 @@ router.post('/', (req, res) => {
 
 // 5. PUT: Atualizar usuário por ID
 router.put('/:id', (req, res) => {
-    const users = readData();
+    let users = readData();
     const id = req.params.id;
     const updateData = req.body;
-
     const userIndex = users.findIndex(u => u.id === id);
 
     if (userIndex !== -1) {
-        users[userIndex] = {
-            ...users[userIndex],
-            ...updateData
-        };
+        users[userIndex] = { ...users[userIndex], ...updateData };
         writeData(users);
         return res.json(users[userIndex]);
     }
@@ -113,9 +108,8 @@ router.put('/:id', (req, res) => {
 
 // 6. DELETE: Remover usuário por ID
 router.delete('/:id', (req, res) => {
-    const users = readData();
+    let users = readData();
     const id = req.params.id;
-
     const updatedUsers = users.filter(u => u.id !== id);
 
     if (updatedUsers.length < users.length) {
