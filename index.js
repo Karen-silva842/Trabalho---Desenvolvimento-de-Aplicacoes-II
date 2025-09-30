@@ -1,4 +1,4 @@
-// index.js (ou app.js)
+// index.js
 
 const express = require('express');
 const app = express();
@@ -6,17 +6,10 @@ const port = 3000;
 const swaggerUi = require('swagger-ui-express');
 
 // --- Importação de Rotas ---
-// Certifique-se de que esses arquivos estão na pasta './routes'
 const usersRoutes = require('./routes/usersRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
-// Exemplo de outras rotas que você irá criar:
-// const productRoutes = require('./routes/productRoutes');
 
-// --- Configuração do Swagger (Documentação da API) ---
-// *******************************************************************
-// ATENÇÃO: Você deve criar este objeto 'swaggerDocument' 
-// com a definição de todas as suas rotas e modelos de dados.
-// Por enquanto, vou usar um mock (documento básico).
+// --- Documentação Swagger ---
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
@@ -30,56 +23,151 @@ const swaggerDocument = {
       description: 'Servidor Local',
     },
   ],
-  // Você irá adicionar aqui as definições de schemas e paths (rotas)
-  // para users, suppliers, products, etc.
   paths: {
-    // Exemplo de como a rota /users deve ser documentada
+    // --- Usuários ---
     '/users': {
       get: {
         summary: 'Lista todos os usuários',
         responses: {
-          '200': {
-            description: 'Lista de usuários retornada com sucesso.',
-          },
-        },
+          '200': { description: 'Lista de usuários retornada com sucesso.' }
+        }
       },
+      post: {
+        summary: 'Cadastra novo usuário',
+        responses: {
+          '201': { description: 'Usuário criado com sucesso.' }
+        }
+      }
     },
-    // ... adicione todas as rotas aqui ...
+    '/users/search': {
+      get: {
+        summary: 'Busca usuários pelo nome',
+        parameters: [
+          {
+            name: 'name',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '200': { description: 'Usuário(s) encontrado(s).' },
+          '404': { description: 'Nenhum usuário encontrado.' }
+        }
+      }
+    },
+    '/users/{id}': {
+      get: {
+        summary: 'Busca usuário pelo ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Usuário encontrado.' },
+          '404': { description: 'Usuário não encontrado.' }
+        }
+      },
+      put: {
+        summary: 'Atualiza usuário por ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Usuário atualizado com sucesso.' },
+          '404': { description: 'Usuário não encontrado.' }
+        }
+      },
+      delete: {
+        summary: 'Remove usuário por ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Usuário removido com sucesso.' },
+          '404': { description: 'Usuário não encontrado.' }
+        }
+      }
+    },
+
+    // --- Fornecedores ---
+    '/suppliers': {
+      get: {
+        summary: 'Lista todos os fornecedores',
+        responses: {
+          '200': { description: 'Lista de fornecedores retornada com sucesso.' }
+        }
+      },
+      post: {
+        summary: 'Cadastra novo fornecedor',
+        responses: {
+          '201': { description: 'Fornecedor criado com sucesso.' }
+        }
+      }
+    },
+    '/suppliers/search': {
+      get: {
+        summary: 'Busca fornecedores pelo nome',
+        parameters: [
+          { name: 'name', in: 'query', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Fornecedor(es) encontrado(s).' },
+          '404': { description: 'Nenhum fornecedor encontrado.' }
+        }
+      }
+    },
+    '/suppliers/{id}': {
+      get: {
+        summary: 'Busca fornecedor pelo ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Fornecedor encontrado.' },
+          '404': { description: 'Fornecedor não encontrado.' }
+        }
+      },
+      put: {
+        summary: 'Atualiza fornecedor por ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Fornecedor atualizado com sucesso.' },
+          '404': { description: 'Fornecedor não encontrado.' }
+        }
+      },
+      delete: {
+        summary: 'Remove fornecedor por ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Fornecedor removido com sucesso.' },
+          '404': { description: 'Fornecedor não encontrado.' }
+        }
+      }
+    }
   }
 };
-// *******************************************************************
-
 
 // --- Middlewares Globais ---
-
-// Middleware para processar requisições com corpo JSON (necessário para POST/PUT)
 app.use(express.json());
-
-// Middleware para processar dados de formulário URL-encoded
 app.use(express.urlencoded({ extended: true }));
 
-
-// --- Montagem das Rotas da Aplicação ---
-
-// Monta as rotas CRUD de Usuários no endpoint /users
+// --- Rotas ---
 app.use('/users', usersRoutes);
-
-// Monta as rotas CRUD de Fornecedores no endpoint /suppliers
 app.use('/suppliers', supplierRoutes);
 
-// Monta as rotas da Documentação Swagger no endpoint /api-docs
-// A documentação estará acessível em: http://localhost:3000/api-docs
+// --- Swagger ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-
-// --- Rota Raiz (Opcional, apenas para testar se o servidor está ativo) ---
+// --- Rota Raiz ---
 app.get('/', (req, res) => {
   res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a> para a documentação.');
 });
 
-
 // --- Inicialização do Servidor ---
-
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
   console.log(`Documentação Swagger em http://localhost:${port}/api-docs`);
