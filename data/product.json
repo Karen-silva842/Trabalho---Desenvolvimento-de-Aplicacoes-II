@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "name": "Teclado Gamer",
+    "description": "Teclado mecânico RGB",
+    "price": "350.00",
+    "stock_quantity": "20",
+    "supplier_id": "123",
+    "status": "on"
+  }
+]

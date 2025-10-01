@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "store_name": "Loja Central",
+    "cnpj": "12.345.678/0001-90",
+    "address": "Rua Principal, 100",
+    "phone_number": "48 99999-0000",
+    "contact_email": "central@loja.com",
+    "status": "on"
+  }
+]
