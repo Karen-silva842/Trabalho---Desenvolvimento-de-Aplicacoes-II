@@ -1,122 +1,74 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const { v4: uuidv4 } = require('uuid')
 const fs = require('fs');
-const path = require('path');
 
-// Caminho para o arquivo de dados dos fornecedores
-const suppliersFilePath = path.join(__dirname, '..', 'data', 'suppliers.json');
+var suppliersDB = loadSuppliers();
 
-// --- Funções Auxiliares ---
-function readData() {
+function loadSuppliers() {
     try {
-        const data = fs.readFileSync(suppliersFilePath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error("Erro ao ler supplier.json:", error);
+        return JSON.parse(fs.readFileSync('./data/suppliers.json', 'utf8'));
+    } catch (err) {
         return [];
     }
 }
 
-function writeData(data) {
+function saveSuppliers() {
     try {
-        fs.writeFileSync(suppliersFilePath, JSON.stringify(data, null, 2), 'utf8');
-    } catch (error) {
-        console.error("Erro ao escrever em supplier.json:", error);
+        fs.writeFileSync('./data/suppliers.json', JSON.stringify(suppliersDB, null, 2));
+        return "Saved";
+    } catch (err) {
+        return "Not saved";
     }
 }
 
-// --- ROTAS CRUD ---
-
-// 1. GET: Listar todos os fornecedores
 router.get('/', (req, res) => {
-    const suppliers = readData();
-    res.json(suppliers);
+    suppliersDB = loadSuppliers();
+    res.json(suppliersDB);
 });
 
-// 2. GET: Buscar fornecedor por nome
-router.get('/search', (req, res) => {
-    const suppliers = readData();
-    const { name } = req.query;
-
-    if (!name) {
-        return res.status(400).json({ message: 'Parâmetro "name" é obrigatório.' });
-    }
-
-    const result = suppliers.filter(s =>
-        s.supplier_name.toLowerCase().includes(name.toLowerCase())
-    );
-
-    if (result.length > 0) {
-        return res.json(result);
-    }
-
-    res.status(404).json({ message: 'Nenhum fornecedor encontrado com esse nome.' });
-});
-
-// 3. GET: Buscar fornecedor por ID
 router.get('/:id', (req, res) => {
-    const suppliers = readData();
     const id = req.params.id;
-    const supplier = suppliers.find(s => s.id === id);
-
-    if (supplier) {
-        return res.json(supplier);
-    }
-
-    res.status(404).json({ message: 'Fornecedor não encontrado.' });
+    suppliersDB = loadSuppliers();
+    const supplier = suppliersDB.find(s => s.id === id);
+    if (!supplier) return res.status(404).json({ erro: "Fornecedor não encontrado!" });
+    res.json(supplier);
 });
 
-// 4. POST: Criar novo fornecedor
 router.post('/', (req, res) => {
-    const suppliers = readData();
-    const newSupplier = req.body;
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) return res.status(400).json({ erro: "Preencha todos os campos!" });
 
-    if (!newSupplier.supplier_name || !newSupplier.supplier_category || !newSupplier.contact_email || !newSupplier.phone_number) {
-        return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
-    }
-
-    const newId = `supplier_${Date.now()}`;
-    const supplierWithId = {
-        id: newId,
-        ...newSupplier,
-        status: newSupplier.status || 'on'
-    };
-
-    suppliers.push(supplierWithId);
-    writeData(suppliers);
-
-    res.status(201).json(supplierWithId);
+    suppliersDB = loadSuppliers();
+    const newSupplier = { id: uuidv4(), name, email, phone };
+    suppliersDB.push(newSupplier);
+    const result = saveSuppliers();
+    console.log(result);
+    res.json(newSupplier);
 });
 
-// 5. PUT: Atualizar fornecedor por ID
 router.put('/:id', (req, res) => {
-    let suppliers = readData();
     const id = req.params.id;
-    const updateData = req.body;
-    const supplierIndex = suppliers.findIndex(s => s.id === id);
+    suppliersDB = loadSuppliers();
+    const index = suppliersDB.findIndex(s => s.id === id);
+    if (index === -1) return res.status(404).json({ erro: "Fornecedor não encontrado!" });
 
-    if (supplierIndex !== -1) {
-        suppliers[supplierIndex] = { ...suppliers[supplierIndex], ...updateData };
-        writeData(suppliers);
-        return res.json(suppliers[supplierIndex]);
-    }
-
-    res.status(404).json({ message: 'Fornecedor não encontrado para atualização.' });
+    suppliersDB[index] = { ...suppliersDB[index], ...req.body, id };
+    const result = saveSuppliers();
+    console.log(result);
+    res.json(suppliersDB[index]);
 });
 
-// 6. DELETE: Remover fornecedor por ID
 router.delete('/:id', (req, res) => {
-    let suppliers = readData();
     const id = req.params.id;
-    const updatedSuppliers = suppliers.filter(s => s.id !== id);
+    suppliersDB = loadSuppliers();
+    const index = suppliersDB.findIndex(s => s.id === id);
+    if (index === -1) return res.status(404).json({ erro: "Fornecedor não encontrado!" });
 
-    if (updatedSuppliers.length < suppliers.length) {
-        writeData(updatedSuppliers);
-        return res.status(200).json({ message: `Fornecedor ${id} removido com sucesso.` });
-    }
-
-    res.status(404).json({ message: 'Fornecedor não encontrado para remoção.' });
+    const deleted = suppliersDB.splice(index, 1);
+    const result = saveSuppliers();
+    console.log(result);
+    res.json(deleted);
 });
 
-// Exporta o router para ser usado no index.js
 module.exports = router;
