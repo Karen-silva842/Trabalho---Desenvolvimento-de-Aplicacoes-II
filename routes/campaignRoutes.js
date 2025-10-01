@@ -43,5 +43,4 @@ router.delete("/:id", (req, res) => {
   res.json({ msg: "Campanha removida" });
 });
 
-// Exportando no estilo CommonJS
 module.exports = router;

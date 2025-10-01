@@ -43,5 +43,4 @@ router.delete("/:id", (req, res) => {
   res.json({ msg: "Pedido removido" });
 });
 
-// CORREÇÃO: exportar no estilo CommonJS
 module.exports = router;

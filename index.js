@@ -3,15 +3,13 @@ const app = express();
 const port = 3000;
 const swaggerUi = require('swagger-ui-express');
 
-// --- Importação de Rotas ---
 const usersRoutes = require('./routes/usersRoutes');
-const supplierRoutes = require('./routes/suppliersRoutes');
+const suppliersRoutes = require('./routes/suppliersRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const campaignRoutes = require('./routes/campaignRoutes');
-const productRoutes = require('./routes/productRoutes'); // NOVO
-const storeRoutes = require('./routes/storeRoutes');     // NOVO
+const productRoutes = require('./routes/productRoutes'); 
+const storeRoutes = require('./routes/storeRoutes');     
 
-// --- Documentação Swagger ---
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
@@ -26,7 +24,7 @@ const swaggerDocument = {
     },
   ],
   paths: {
-    // --- Usuários ---
+
     '/users': {
       get: { summary: 'Lista todos os usuários', responses: { '200': { description: 'Lista de usuários retornada com sucesso.' } } },
       post: { summary: 'Cadastra novo usuário', responses: { '201': { description: 'Usuário criado com sucesso.' } } }
@@ -44,7 +42,6 @@ const swaggerDocument = {
       delete: { summary: 'Remove usuário por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Usuário removido com sucesso.' }, '404': { description: 'Usuário não encontrado.' } } }
     },
 
-    // --- Fornecedores ---
     '/suppliers': {
       get: { summary: 'Lista todos os fornecedores', responses: { '200': { description: 'Lista de fornecedores retornada com sucesso.' } } },
       post: { summary: 'Cadastra novo fornecedor', responses: { '201': { description: 'Fornecedor criado com sucesso.' } } }
@@ -62,7 +59,6 @@ const swaggerDocument = {
       delete: { summary: 'Remove fornecedor por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Fornecedor removido com sucesso.' }, '404': { description: 'Fornecedor não encontrado.' } } }
     },
 
-    // --- Pedidos ---
     '/orders': {
       get: { summary: 'Lista todos os pedidos', responses: { '200': { description: 'Lista de pedidos retornada com sucesso.' } } },
       post: { summary: 'Cadastra novo pedido', responses: { '201': { description: 'Pedido criado com sucesso.' } } }
@@ -73,7 +69,6 @@ const swaggerDocument = {
       delete: { summary: 'Remove pedido por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Pedido removido com sucesso.' } } }
     },
 
-    // --- Campanhas ---
     '/campaigns': {
       get: { summary: 'Lista todas as campanhas', responses: { '200': { description: 'Lista de campanhas retornada com sucesso.' } } },
       post: { summary: 'Cadastra nova campanha', responses: { '201': { description: 'Campanha criada com sucesso.' } } }
@@ -84,7 +79,6 @@ const swaggerDocument = {
       delete: { summary: 'Remove campanha por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Campanha removida com sucesso.' } } }
     },
 
-    // --- Produtos ---
     '/products': {
       get: { summary: 'Lista todos os produtos', responses: { '200': { description: 'Lista de produtos retornada com sucesso.' } } },
       post: { summary: 'Cadastra novo produto', responses: { '201': { description: 'Produto criado com sucesso.' } } }
@@ -95,7 +89,6 @@ const swaggerDocument = {
       delete: { summary: 'Remove produto por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Produto removido com sucesso.' } } }
     },
 
-    // --- Lojas ---
     '/stores': {
       get: { summary: 'Lista todas as lojas', responses: { '200': { description: 'Lista de lojas retornada com sucesso.' } } },
       post: { summary: 'Cadastra nova loja', responses: { '201': { description: 'Loja criada com sucesso.' } } }
@@ -108,27 +101,22 @@ const swaggerDocument = {
   }
 };
 
-// --- Middlewares Globais ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- Rotas ---
 app.use('/users', usersRoutes);
-app.use('/suppliers', supplierRoutes);
+app.use('/suppliers', suppliersRoutes);
 app.use('/orders', orderRoutes);
 app.use('/campaigns', campaignRoutes);
-app.use('/products', productRoutes); // NOVO
-app.use('/stores', storeRoutes);     // NOVO
+app.use('/products', productRoutes); 
+app.use('/stores', storeRoutes);     
 
-// --- Swagger ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// --- Rota Raiz ---
 app.get('/', (req, res) => {
   res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a> para a documentação.');
 });
 
-// --- Inicialização do Servidor ---
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
   console.log(`Documentação Swagger em http://localhost:${port}/api-docs`);
