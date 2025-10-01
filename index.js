@@ -5,9 +5,11 @@ const swaggerUi = require('swagger-ui-express');
 
 // --- Importação de Rotas ---
 const usersRoutes = require('./routes/usersRoutes');
-const supplierRoutes = require('./routes/suppliersRoutes'); 
-const orderRoutes = require('./routes/orderRoutes');       // NOVO: rotas de pedidos
-const campaignRoutes = require('./routes/campaignRoutes'); // NOVO: rotas de campanhas
+const supplierRoutes = require('./routes/suppliersRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const campaignRoutes = require('./routes/campaignRoutes');
+const productRoutes = require('./routes/productRoutes'); // NOVO
+const storeRoutes = require('./routes/storeRoutes');     // NOVO
 
 // --- Documentação Swagger ---
 const swaggerDocument = {
@@ -80,6 +82,28 @@ const swaggerDocument = {
       get: { summary: 'Busca campanha pelo ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Campanha encontrada.' }, '404': { description: 'Campanha não encontrada.' } } },
       put: { summary: 'Atualiza campanha por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Campanha atualizada com sucesso.' } } },
       delete: { summary: 'Remove campanha por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Campanha removida com sucesso.' } } }
+    },
+
+    // --- Produtos ---
+    '/products': {
+      get: { summary: 'Lista todos os produtos', responses: { '200': { description: 'Lista de produtos retornada com sucesso.' } } },
+      post: { summary: 'Cadastra novo produto', responses: { '201': { description: 'Produto criado com sucesso.' } } }
+    },
+    '/products/{id}': {
+      get: { summary: 'Busca produto pelo ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Produto encontrado.' }, '404': { description: 'Produto não encontrado.' } } },
+      put: { summary: 'Atualiza produto por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Produto atualizado com sucesso.' } } },
+      delete: { summary: 'Remove produto por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Produto removido com sucesso.' } } }
+    },
+
+    // --- Lojas ---
+    '/stores': {
+      get: { summary: 'Lista todas as lojas', responses: { '200': { description: 'Lista de lojas retornada com sucesso.' } } },
+      post: { summary: 'Cadastra nova loja', responses: { '201': { description: 'Loja criada com sucesso.' } } }
+    },
+    '/stores/{id}': {
+      get: { summary: 'Busca loja pelo ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Loja encontrada.' }, '404': { description: 'Loja não encontrada.' } } },
+      put: { summary: 'Atualiza loja por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Loja atualizada com sucesso.' } } },
+      delete: { summary: 'Remove loja por ID', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Loja removida com sucesso.' } } }
     }
   }
 };
@@ -91,8 +115,10 @@ app.use(express.urlencoded({ extended: true }));
 // --- Rotas ---
 app.use('/users', usersRoutes);
 app.use('/suppliers', supplierRoutes);
-app.use('/orders', orderRoutes);       // NOVO
-app.use('/campaigns', campaignRoutes); // NOVO
+app.use('/orders', orderRoutes);
+app.use('/campaigns', campaignRoutes);
+app.use('/products', productRoutes); // NOVO
+app.use('/stores', storeRoutes);     // NOVO
 
 // --- Swagger ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
