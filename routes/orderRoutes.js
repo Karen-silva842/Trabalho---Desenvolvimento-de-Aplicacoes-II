@@ -1,46 +1,87 @@
-const express = require('express');
-const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const express = require('express')
+const router = express.Router()
+const { v4: uuidv4 } = require('uuid')
+const fs = require('fs')
 
-const router = express.Router();
-const filePath = "./data/order.json";
+var ordersDB = loadOrders()
 
-router.get("/", (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath));
-  res.json(data);
-});
+function loadOrders() {
+  try {
+    return JSON.parse(fs.readFileSync('./data/order.json', 'utf8'))
+  } catch (err) {
+    return []
+  }
+}
 
-router.get("/:id", (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath));
-  const order = data.find(o => o.id === req.params.id);
-  order ? res.json(order) : res.status(404).json({ msg: "Pedido não encontrado" });
-});
+function saveOrders() {
+  try {
+    fs.writeFileSync('./data/order.json', JSON.stringify(ordersDB, null, 2))
+    return 'Saved'
+  } catch (err) {
+    return 'Not saved'
+  }
+}
 
-router.post("/", (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath));
-  const newOrder = { id: uuidv4(), ...req.body };
-  data.push(newOrder);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  res.status(201).json(newOrder);
-});
+router.get('/', (req, res) => {
+  console.log("GET /orders")
+  ordersDB = loadOrders()
+  res.json(ordersDB)
+})
 
-router.put("/:id", (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath));
-  const index = data.findIndex(o => o.id === req.params.id);
-  if (index === -1) return res.status(404).json({ msg: "Pedido não encontrado" });
+router.get('/:id', (req, res) => {
+  const id = req.params.id
+  ordersDB = loadOrders()
+  const order = ordersDB.find(order => order.id === id)
+  if (!order) {
+    return res.status(404).json({ "erro": "Pedido não encontrado!" })
+  }
+  res.json(order)
+})
 
-  data[index] = { ...data[index], ...req.body };
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  res.json(data[index]);
-});
+router.post('/', (req, res) => {
+  const newOrder = {
+    id: uuidv4(),
+    ...req.body
+  }
+  console.log(newOrder)
+  ordersDB = loadOrders()
+  ordersDB.push(newOrder)
+  let result = saveOrders()
+  console.log(result)
+  return res.status(201).json(newOrder)
+})
 
-router.delete("/:id", (req, res) => {
-  let data = JSON.parse(fs.readFileSync(filePath));
-  const newData = data.filter(o => o.id !== req.params.id);
-  if (data.length === newData.length) return res.status(404).json({ msg: "Pedido não encontrado" });
+router.put('/:id', (req, res) => {
+  const id = req.params.id
+  const newOrderData = req.body
+  ordersDB = loadOrders()
+  const currentOrder = ordersDB.find(order => order.id === id)
+  const currentIndex = ordersDB.findIndex(order => order.id === id)
 
-  fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
-  res.json({ msg: "Pedido removido" });
-});
+  if (!currentOrder) {
+    return res.status(404).json({ "erro": "Pedido não encontrado!" })
+  }
 
-module.exports = router;
+  ordersDB[currentIndex] = { ...currentOrder, ...newOrderData }
+  let result = saveOrders()
+  console.log(result)
+  return res.json(ordersDB[currentIndex])
+})
+
+router.delete('/:id', (req, res) => {
+  const id = req.params.id
+  ordersDB = loadOrders()
+  const currentOrder = ordersDB.find(order => order.id === id)
+  const currentIndex = ordersDB.findIndex(order => order.id === id)
+
+  if (!currentOrder) {
+    return res.status(404).json({ "erro": "Pedido não encontrado!" })
+  }
+
+  const deleted = ordersDB.splice(currentIndex, 1)
+  let result = saveOrders()
+  console.log(result)
+  res.json(deleted)
+})
+
+module.exports = router
