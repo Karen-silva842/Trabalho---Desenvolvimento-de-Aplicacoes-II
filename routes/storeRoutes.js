@@ -7,7 +7,7 @@ let storesDB = loadStores()
 
 function loadStores() {
   try {
-    return JSON.parse(fs.readFileSync('./src/db/store.json', 'utf8'))
+    return JSON.parse(fs.readFileSync('./src/data/store.json', 'utf8'))
   } catch (err) {
     return []
   }
@@ -15,7 +15,7 @@ function loadStores() {
 
 function saveStores() {
   try {
-    fs.writeFileSync('./src/db/store.json', JSON.stringify(storesDB, null, 2))
+    fs.writeFileSync('./src/data/store.json', JSON.stringify(storesDB, null, 2))
     return 'Salvo'
   } catch (err) {
     console.error('Erro ao salvar lojas:', err)
