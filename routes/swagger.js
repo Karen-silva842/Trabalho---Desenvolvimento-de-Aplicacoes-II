@@ -23,7 +23,7 @@ const options = {
       { name: 'Campanhas', description: 'Rotas para campanhas promocionais' },
     ],
   },
-  apis: ['./routes/*.js'], // O Swagger vai ler TODAS as anotações @swagger das rotas
+  apis: ['./routes/**/*.js'], // Corrigido para buscar arquivos em subpastas também
 };
 
 const swaggerSpec = swaggerJSDoc(options);
