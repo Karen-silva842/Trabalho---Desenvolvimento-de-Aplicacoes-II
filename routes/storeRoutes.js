@@ -27,7 +27,7 @@ function saveStores() {
  * @swagger
  * tags:
  *   - name: Lojas
- *     description: Rotas para gerenciamento das lojas
+ *     description: Gerenciamento das lojas - Bryan Gonçalves Pereira
  */
 
 /**

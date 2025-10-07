@@ -27,7 +27,7 @@ function saveCampaigns() {
  * @swagger
  * tags:
  *   - name: Campanhas
- *     description: Rotas para gerenciamento de campanhas promocionais
+ *     description: Gerenciamento de Campanhas - Davi Mendes
  */
 
 /**
