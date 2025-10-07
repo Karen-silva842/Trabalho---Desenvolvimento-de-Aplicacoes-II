@@ -1,32 +1,33 @@
 const express = require('express')
 const router = express.Router()
 const { v4: uuidv4 } = require('uuid')
-const fs = require('fs');
+const fs = require('fs')
 
-var suppliersDB = loadSuppliers();
+let suppliersDB = loadSuppliers()
 
 function loadSuppliers() {
-    try {
-        return JSON.parse(fs.readFileSync('./data/suppliers.json', 'utf8'));
-    } catch (err) {
-        return [];
-    }
+  try {
+    return JSON.parse(fs.readFileSync('./data/suppliers.json', 'utf8'))
+  } catch (err) {
+    return []
+  }
 }
 
 function saveSuppliers() {
-    try {
-        fs.writeFileSync('./data/suppliers.json', JSON.stringify(suppliersDB, null, 2));
-        return "Salvo";
-    } catch (err) {
-        return "Não salvo";
-    }
+  try {
+    fs.writeFileSync('./data/suppliers.json', JSON.stringify(suppliersDB, null, 2))
+    return 'Salvo'
+  } catch (err) {
+    console.error('Erro ao salvar fornecedores:', err)
+    return 'Não salvo'
+  }
 }
 
 /**
  * @swagger
  * tags:
- *   name: Fornecedores
- *   description: Rotas para gerenciamento de fornecedores
+ *   - name: Fornecedores
+ *     description: Rotas para gerenciamento de fornecedores
  */
 
 /**
@@ -40,9 +41,9 @@ function saveSuppliers() {
  *         description: Lista de fornecedores cadastrados
  */
 router.get('/', (req, res) => {
-    suppliersDB = loadSuppliers();
-    res.json(suppliersDB);
-});
+  suppliersDB = loadSuppliers()
+  res.json(suppliersDB)
+})
 
 /**
  * @swagger
@@ -64,13 +65,12 @@ router.get('/', (req, res) => {
  *         description: Fornecedor não encontrado
  */
 router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    suppliersDB = loadSuppliers();
-    const supplier = suppliersDB.find(s => s.id === id);
-    if (!supplier)
-        return res.status(404).json({ erro: "Fornecedor não encontrado!" });
-    res.json(supplier);
-});
+  const id = req.params.id
+  suppliersDB = loadSuppliers()
+  const supplier = suppliersDB.find(s => s.id === id)
+  if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
+  res.json(supplier)
+})
 
 /**
  * @swagger
@@ -84,6 +84,10 @@ router.get('/:id', (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - phone
  *             properties:
  *               name:
  *                 type: string
@@ -101,16 +105,15 @@ router.get('/:id', (req, res) => {
  *         description: Campos obrigatórios não preenchidos
  */
 router.post('/', (req, res) => {
-    const { name, email, phone } = req.body;
-    if (!name || !email || !phone)
-        return res.status(400).json({ erro: "Preencha todos os campos!" });
+  const { name, email, phone } = req.body
+  if (!name || !email || !phone) return res.status(400).json({ erro: 'Preencha todos os campos!' })
 
-    suppliersDB = loadSuppliers();
-    const newSupplier = { id: uuidv4(), name, email, phone };
-    suppliersDB.push(newSupplier);
-    saveSuppliers();
-    res.status(201).json(newSupplier);
-});
+  suppliersDB = loadSuppliers()
+  const newSupplier = { id: uuidv4(), name, email, phone }
+  suppliersDB.push(newSupplier)
+  saveSuppliers()
+  res.status(201).json(newSupplier)
+})
 
 /**
  * @swagger
@@ -145,16 +148,15 @@ router.post('/', (req, res) => {
  *         description: Fornecedor não encontrado
  */
 router.put('/:id', (req, res) => {
-    const id = req.params.id;
-    suppliersDB = loadSuppliers();
-    const index = suppliersDB.findIndex(s => s.id === id);
-    if (index === -1)
-        return res.status(404).json({ erro: "Fornecedor não encontrado!" });
+  const id = req.params.id
+  suppliersDB = loadSuppliers()
+  const index = suppliersDB.findIndex(s => s.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
 
-    suppliersDB[index] = { ...suppliersDB[index], ...req.body, id };
-    saveSuppliers();
-    res.json(suppliersDB[index]);
-});
+  suppliersDB[index] = { ...suppliersDB[index], ...req.body, id }
+  saveSuppliers()
+  res.json(suppliersDB[index])
+})
 
 /**
  * @swagger
@@ -176,15 +178,14 @@ router.put('/:id', (req, res) => {
  *         description: Fornecedor não encontrado
  */
 router.delete('/:id', (req, res) => {
-    const id = req.params.id;
-    suppliersDB = loadSuppliers();
-    const index = suppliersDB.findIndex(s => s.id === id);
-    if (index === -1)
-        return res.status(404).json({ erro: "Fornecedor não encontrado!" });
+  const id = req.params.id
+  suppliersDB = loadSuppliers()
+  const index = suppliersDB.findIndex(s => s.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
 
-    const deleted = suppliersDB.splice(index, 1);
-    saveSuppliers();
-    res.json(deleted);
-});
+  const deleted = suppliersDB.splice(index, 1)
+  saveSuppliers()
+  res.json(deleted[0]) // retorna apenas o objeto excluído
+})
 
-module.exports = router;
+module.exports = router

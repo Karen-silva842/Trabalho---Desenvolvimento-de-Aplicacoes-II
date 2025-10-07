@@ -7,30 +7,33 @@ const swaggerSpec = require('./routes/swagger');
 // Importa as rotas
 const usersRoutes = require('./routes/usersRoutes');
 const suppliersRoutes = require('./routes/suppliersRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const campaignRoutes = require('./routes/campaignRoutes');
-const productRoutes = require('./routes/productRoutes');
-const storeRoutes = require('./routes/storeRoutes');
+const storesRoutes = require('./routes/storeRoutes');
+const productsRoutes = require('./routes/productRoutes');
+const ordersRoutes = require('./routes/orderRoutes');
+const campaignsRoutes = require('./routes/campaignRoutes');
 
+// Middleware para ler JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Usa as rotas
+// Rotas da API
 app.use('/users', usersRoutes);
 app.use('/suppliers', suppliersRoutes);
-app.use('/orders', orderRoutes);
-app.use('/campaigns', campaignRoutes);
-app.use('/products', productRoutes);
-app.use('/stores', storeRoutes);
+app.use('/stores', storesRoutes);
+app.use('/products', productsRoutes);
+app.use('/orders', ordersRoutes);
+app.use('/campaigns', campaignsRoutes);
 
-// Swagger separado
+// Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Rota principal
 app.get('/', (req, res) => {
   res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a> para a documentação.');
 });
 
+// Inicia o servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
-  console.log(`Documentação Swagger em http://localhost:${port}/api-docs`);
+  console.log(`Documentação Swagger disponível em http://localhost:${port}/api-docs`);
 });
