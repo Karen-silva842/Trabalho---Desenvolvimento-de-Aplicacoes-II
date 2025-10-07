@@ -34,6 +34,10 @@ function saveOrders() {
  *     Order:
  *       type: object
  *       properties:
+ *         id:
+ *           type: string
+ *         store_id:
+ *           type: string
  *         product_id:
  *           type: string
  *         quantity:
@@ -42,22 +46,6 @@ function saveOrders() {
  *           type: string
  *         unit_price:
  *           type: string
- *       required:
- *         - product_id
- *         - quantity
- *         - unit_price
- *
- *     Order:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         store_id:
- *           type: string
- *         item:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/OrderItem'
  *         total_amount:
  *           type: string
  *         status:
@@ -68,7 +56,9 @@ function saveOrders() {
  *       required:
  *         - id
  *         - store_id
- *         - item
+ *         - product_id
+ *         - quantity
+ *         - unit_price
  *         - total_amount
  *         - status
  *         - date
