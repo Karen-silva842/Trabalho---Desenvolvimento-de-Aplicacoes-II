@@ -23,7 +23,7 @@ const options = {
       { name: 'Campanhas', description: 'Rotas gerenciamento de Campanhas - Davi Mendes' },
     ],
   },
-  apis: ['./routes/**/*.js'], // Corrigido para buscar arquivos em subpastas também
+  apis: ['./routes/**/*.js'], 
 };
 
 const swaggerSpec = swaggerJSDoc(options);
