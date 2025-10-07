@@ -9,8 +9,8 @@ const usersRoutes = require('./routes/usersRoutes');
 const suppliersRoutes = require('./routes/suppliersRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const productRoutes = require('./routes/productRoutes');
-const ordersRoutes = require('./routes/orderRoutes');
-const campaignsRoutes = require('./routes/campaignRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const campaignRoutes = require('./routes/campaignRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,8 +19,8 @@ app.use('/users', usersRoutes);
 app.use('/supplier', suppliersRoutes);
 app.use('/store', storeRoutes);
 app.use('/products', productRoutes);
-app.use('/orders', ordersRoutes);
-app.use('/campaigns', campaignsRoutes);
+app.use('/orders', orderRoutes);
+app.use('/campaigns', campaignRoutes);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

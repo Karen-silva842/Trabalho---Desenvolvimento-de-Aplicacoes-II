@@ -7,7 +7,7 @@ let productsDB = loadProducts();
 
 function loadProducts() {
     try {
-        return JSON.parse(fs.readFileSync('./data/products.json', 'utf8'));
+        return JSON.parse(fs.readFileSync('./data/product.json', 'utf8'));
     } catch (err) {
         return [];
     }
@@ -15,7 +15,7 @@ function loadProducts() {
 
 function saveProducts() {
     try {
-        fs.writeFileSync('./data/products.json', JSON.stringify(productsDB, null, 2));
+        fs.writeFileSync('./data/product.json', JSON.stringify(productsDB, null, 2));
         return "Salvo";
     } catch (err) {
         return "Não salvo";
