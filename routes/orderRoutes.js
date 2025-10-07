@@ -1,24 +1,25 @@
-const express = require('express')
-const router = express.Router()
-const { v4: uuidv4 } = require('uuid')
-const fs = require('fs')
+const express = require('express');
+const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
-let ordersDB = loadOrders()
+let ordersDB = loadOrders();
 
 function loadOrders() {
   try {
-    return JSON.parse(fs.readFileSync('./data/order.json', 'utf8'))
+    return JSON.parse(fs.readFileSync('./data/order.json', 'utf8'));
   } catch (err) {
-    return []
+    return [];
   }
 }
 
 function saveOrders() {
   try {
-    fs.writeFileSync('./data/order.json', JSON.stringify(ordersDB, null, 2))
-    return 'Saved'
+    fs.writeFileSync('./data/order.json', JSON.stringify(ordersDB, null, 2));
+    return 'Salvo';
   } catch (err) {
-    return 'Not saved'
+    console.error('Erro ao salvar pedidos:', err);
+    return 'Não salvo';
   }
 }
 
@@ -26,7 +27,7 @@ function saveOrders() {
  * @swagger
  * tags:
  *   - name: Pedidos
- *     description: Rotas relacionadas a pedidos
+ *     description: Rotas para gerenciamento de pedidos
  */
 
 /**
@@ -34,22 +35,22 @@ function saveOrders() {
  * /orders:
  *   get:
  *     summary: Lista todos os pedidos
- *     tags: [Orders]
+ *     tags: [Pedidos]
  *     responses:
  *       200:
  *         description: Lista de pedidos retornada com sucesso
  */
 router.get('/', (req, res) => {
-  ordersDB = loadOrders()
-  res.json(ordersDB)
-})
+  ordersDB = loadOrders();
+  res.json(ordersDB);
+});
 
 /**
  * @swagger
  * /orders/{id}:
  *   get:
- *     summary: Busca um pedido pelo ID
- *     tags: [Orders]
+ *     summary: Retorna um pedido específico pelo ID
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
@@ -64,19 +65,19 @@ router.get('/', (req, res) => {
  *         description: Pedido não encontrado
  */
 router.get('/:id', (req, res) => {
-  const id = req.params.id
-  ordersDB = loadOrders()
-  const order = ordersDB.find(o => o.id === id)
-  if (!order) return res.status(404).json({ erro: "Pedido não encontrado!" })
-  res.json(order)
-})
+  const id = req.params.id;
+  ordersDB = loadOrders();
+  const order = ordersDB.find(o => o.id === id);
+  if (!order) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+  res.json(order);
+});
 
 /**
  * @swagger
  * /orders:
  *   post:
  *     summary: Cadastra um novo pedido
- *     tags: [Orders]
+ *     tags: [Pedidos]
  *     requestBody:
  *       required: true
  *       content:
@@ -102,19 +103,19 @@ router.get('/:id', (req, res) => {
  *         description: Pedido criado com sucesso
  */
 router.post('/', (req, res) => {
-  const newOrder = { id: uuidv4(), ...req.body }
-  ordersDB = loadOrders()
-  ordersDB.push(newOrder)
-  saveOrders()
-  res.status(201).json(newOrder)
-})
+  const newOrder = { id: uuidv4(), ...req.body };
+  ordersDB = loadOrders();
+  ordersDB.push(newOrder);
+  saveOrders();
+  res.status(201).json(newOrder);
+});
 
 /**
  * @swagger
  * /orders/{id}:
  *   put:
  *     summary: Atualiza um pedido existente
- *     tags: [Orders]
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
@@ -135,22 +136,23 @@ router.post('/', (req, res) => {
  *         description: Pedido não encontrado
  */
 router.put('/:id', (req, res) => {
-  const id = req.params.id
-  const newOrderData = req.body
-  ordersDB = loadOrders()
-  const index = ordersDB.findIndex(o => o.id === id)
-  if (index === -1) return res.status(404).json({ erro: "Pedido não encontrado!" })
-  ordersDB[index] = { ...ordersDB[index], ...newOrderData }
-  saveOrders()
-  res.json(ordersDB[index])
-})
+  const id = req.params.id;
+  const newOrderData = req.body;
+  ordersDB = loadOrders();
+  const index = ordersDB.findIndex(o => o.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+
+  ordersDB[index] = { ...ordersDB[index], ...newOrderData };
+  saveOrders();
+  res.json(ordersDB[index]);
+});
 
 /**
  * @swagger
  * /orders/{id}:
  *   delete:
- *     summary: Remove um pedido pelo ID
- *     tags: [Orders]
+ *     summary: Exclui um pedido pelo ID
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
@@ -160,18 +162,19 @@ router.put('/:id', (req, res) => {
  *           type: string
  *     responses:
  *       200:
- *         description: Pedido removido com sucesso
+ *         description: Pedido excluído com sucesso
  *       404:
  *         description: Pedido não encontrado
  */
 router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  ordersDB = loadOrders()
-  const index = ordersDB.findIndex(o => o.id === id)
-  if (index === -1) return res.status(404).json({ erro: "Pedido não encontrado!" })
-  const deleted = ordersDB.splice(index, 1)
-  saveOrders()
-  res.json(deleted[0])
-})
+  const id = req.params.id;
+  ordersDB = loadOrders();
+  const index = ordersDB.findIndex(o => o.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
 
-module.exports = router
+  const deleted = ordersDB.splice(index, 1);
+  saveOrders();
+  res.json(deleted[0]);
+});
+
+module.exports = router;

@@ -1,24 +1,25 @@
-const express = require('express')
-const router = express.Router()
-const { v4: uuidv4 } = require('uuid')
-const fs = require('fs')
+const express = require('express');
+const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
-let campaignsDB = loadCampaigns()
+let campaignsDB = loadCampaigns();
 
 function loadCampaigns() {
   try {
-    return JSON.parse(fs.readFileSync('./data/campaign.json', 'utf8'))
+    return JSON.parse(fs.readFileSync('./data/campaign.json', 'utf8'));
   } catch (err) {
-    return []
+    return [];
   }
 }
 
 function saveCampaigns() {
   try {
-    fs.writeFileSync('./data/campaign.json', JSON.stringify(campaignsDB, null, 2))
-    return 'Saved'
+    fs.writeFileSync('./data/campaign.json', JSON.stringify(campaignsDB, null, 2));
+    return 'Salvo';
   } catch (err) {
-    return 'Not saved'
+    console.error('Erro ao salvar campanhas:', err);
+    return 'Não salvo';
   }
 }
 
@@ -26,7 +27,7 @@ function saveCampaigns() {
  * @swagger
  * tags:
  *   - name: Campanhas
- *     description: Rotas relacionadas às campanhas promocionais
+ *     description: Rotas para gerenciamento de campanhas promocionais
  */
 
 /**
@@ -34,22 +35,22 @@ function saveCampaigns() {
  * /campaigns:
  *   get:
  *     summary: Lista todas as campanhas
- *     tags: [Campaigns]
+ *     tags: [Campanhas]
  *     responses:
  *       200:
  *         description: Lista de campanhas retornada com sucesso
  */
 router.get('/', (req, res) => {
-  campaignsDB = loadCampaigns()
-  res.json(campaignsDB)
-})
+  campaignsDB = loadCampaigns();
+  res.json(campaignsDB);
+});
 
 /**
  * @swagger
  * /campaigns/{id}:
  *   get:
- *     summary: Busca uma campanha pelo ID
- *     tags: [Campaigns]
+ *     summary: Retorna uma campanha específica pelo ID
+ *     tags: [Campanhas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -64,19 +65,19 @@ router.get('/', (req, res) => {
  *         description: Campanha não encontrada
  */
 router.get('/:id', (req, res) => {
-  const id = req.params.id
-  campaignsDB = loadCampaigns()
-  const campaign = campaignsDB.find(c => c.id === id)
-  if (!campaign) return res.status(404).json({ erro: "Campanha não encontrada!" })
-  res.json(campaign)
-})
+  const id = req.params.id;
+  campaignsDB = loadCampaigns();
+  const campaign = campaignsDB.find(c => c.id === id);
+  if (!campaign) return res.status(404).json({ erro: 'Campanha não encontrada!' });
+  res.json(campaign);
+});
 
 /**
  * @swagger
  * /campaigns:
  *   post:
  *     summary: Cadastra uma nova campanha
- *     tags: [Campaigns]
+ *     tags: [Campanhas]
  *     requestBody:
  *       required: true
  *       content:
@@ -99,19 +100,19 @@ router.get('/:id', (req, res) => {
  *         description: Campanha criada com sucesso
  */
 router.post('/', (req, res) => {
-  const newCampaign = { id: uuidv4(), ...req.body }
-  campaignsDB = loadCampaigns()
-  campaignsDB.push(newCampaign)
-  saveCampaigns()
-  res.status(201).json(newCampaign)
-})
+  const newCampaign = { id: uuidv4(), ...req.body };
+  campaignsDB = loadCampaigns();
+  campaignsDB.push(newCampaign);
+  saveCampaigns();
+  res.status(201).json(newCampaign);
+});
 
 /**
  * @swagger
  * /campaigns/{id}:
  *   put:
  *     summary: Atualiza uma campanha existente
- *     tags: [Campaigns]
+ *     tags: [Campanhas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -132,22 +133,23 @@ router.post('/', (req, res) => {
  *         description: Campanha não encontrada
  */
 router.put('/:id', (req, res) => {
-  const id = req.params.id
-  const newCampaignData = req.body
-  campaignsDB = loadCampaigns()
-  const index = campaignsDB.findIndex(c => c.id === id)
-  if (index === -1) return res.status(404).json({ erro: "Campanha não encontrada!" })
-  campaignsDB[index] = { ...campaignsDB[index], ...newCampaignData }
-  saveCampaigns()
-  res.json(campaignsDB[index])
-})
+  const id = req.params.id;
+  const newCampaignData = req.body;
+  campaignsDB = loadCampaigns();
+  const index = campaignsDB.findIndex(c => c.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Campanha não encontrada!' });
+
+  campaignsDB[index] = { ...campaignsDB[index], ...newCampaignData };
+  saveCampaigns();
+  res.json(campaignsDB[index]);
+});
 
 /**
  * @swagger
  * /campaigns/{id}:
  *   delete:
- *     summary: Remove uma campanha pelo ID
- *     tags: [Campaigns]
+ *     summary: Exclui uma campanha pelo ID
+ *     tags: [Campanhas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -162,13 +164,14 @@ router.put('/:id', (req, res) => {
  *         description: Campanha não encontrada
  */
 router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  campaignsDB = loadCampaigns()
-  const index = campaignsDB.findIndex(c => c.id === id)
-  if (index === -1) return res.status(404).json({ erro: "Campanha não encontrada!" })
-  const deleted = campaignsDB.splice(index, 1)
-  saveCampaigns()
-  res.json(deleted[0])
-})
+  const id = req.params.id;
+  campaignsDB = loadCampaigns();
+  const index = campaignsDB.findIndex(c => c.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Campanha não encontrada!' });
 
-module.exports = router
+  const deleted = campaignsDB.splice(index, 1);
+  saveCampaigns();
+  res.json(deleted[0]);
+});
+
+module.exports = router;
