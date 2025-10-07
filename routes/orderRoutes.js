@@ -31,7 +31,7 @@ function saveOrders() {
  *
  * components:
  *   schemas:
- *     OrderItem:
+ *     Order:
  *       type: object
  *       properties:
  *         product_id:
