@@ -27,7 +27,7 @@ function saveSuppliers() {
  * @swagger
  * tags:
  *   - name: Fornecedores
- *     description: Gerenciamento de fornecedores - Karen Suélen da Silva
+ *     description: Rotas gerenciamento de fornecedores - Karen Suélen da Silva
  */
 
 /**

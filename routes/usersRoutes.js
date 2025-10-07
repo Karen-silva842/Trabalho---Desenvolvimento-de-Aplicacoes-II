@@ -27,7 +27,7 @@ function saveUsers() {
  * @swagger
  * tags:
  *   - name: Usuários
- *     description: Gerenciamento de usuários - Karen Suélen da Silva
+ *     description: Rotas gerenciamento de usuários - Karen Suélen da Silva
  */
 
 /**

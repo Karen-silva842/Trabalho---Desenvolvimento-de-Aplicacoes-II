@@ -27,7 +27,7 @@ function saveOrders() {
  * @swagger
  * tags:
  *   - name: Pedidos
- *     description: Gerenciamento de Pedidos - Davi Mendes
+ *     description: Rotas gerenciamento de Pedidos - Davi Mendes
  */
 
 /**

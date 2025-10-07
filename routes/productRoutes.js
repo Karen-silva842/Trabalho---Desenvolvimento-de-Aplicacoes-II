@@ -26,7 +26,7 @@ function saveProducts() {
  * @swagger
  * tags:
  *   - name: Produtos
- *     description: Gerenciamento de produtos - Bryan Gonçalves Pereira
+ *     description: Rotas gerenciamento de produtos - Bryan Gonçalves Pereira
  */
 
 /**

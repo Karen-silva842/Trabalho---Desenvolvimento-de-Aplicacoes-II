@@ -15,12 +15,12 @@ const options = {
       },
     ],
     tags: [
-      { name: 'Usuários', description: 'Gerenciamento de usuários - Karen Suélen da Silva' },
-      { name: 'Fornecedores', description: 'Gerenciamento de fornecedores - Karen Suélen da Silva' },
-      { name: 'Lojas', description: 'Gerenciamento das lojas - Bryan Gonçalves Pereira' },
-      { name: 'Produtos', description: 'Gerenciamento de produtos - Bryan Gonçalves Pereira' },
-      { name: 'Pedidos', description: 'Gerenciamento de Pedidos - Davi Mendes' },
-      { name: 'Campanhas', description: 'Gerenciamento de Campanhas - Davi Mendes' },
+      { name: 'Usuários', description: 'Rotas gerenciamento de usuários - Karen Suélen da Silva' },
+      { name: 'Fornecedores', description: 'Rotas gerenciamento de fornecedores - Karen Suélen da Silva' },
+      { name: 'Lojas', description: 'Rotas gerenciamento de lojas - Bryan Gonçalves Pereira' },
+      { name: 'Produtos', description: 'Rotas gerenciamento de produtos - Bryan Gonçalves Pereira' },
+      { name: 'Pedidos', description: 'Rotas gerenciamento de Pedidos - Davi Mendes' },
+      { name: 'Campanhas', description: 'Rotas gerenciamento de Campanhas - Davi Mendes' },
     ],
   },
   apis: ['./routes/**/*.js'], // Corrigido para buscar arquivos em subpastas também
