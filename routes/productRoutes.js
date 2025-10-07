@@ -1,3 +1,27 @@
+const express = require('express');
+const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+
+let productsDB = loadProducts();
+
+function loadProducts() {
+    try {
+        return JSON.parse(fs.readFileSync('./data/products.json', 'utf8'));
+    } catch (err) {
+        return [];
+    }
+}
+
+function saveProducts() {
+    try {
+        fs.writeFileSync('./data/products.json', JSON.stringify(productsDB, null, 2));
+        return "Salvo";
+    } catch (err) {
+        return "Não salvo";
+    }
+}
+
 /**
  * @swagger
  * tags:
@@ -16,8 +40,8 @@
  *         description: Lista de produtos cadastrados
  */
 router.get('/', (req, res) => {
-  productsDB = loadProducts();
-  res.json(productsDB);
+    productsDB = loadProducts();
+    res.json(productsDB);
 });
 
 /**
@@ -40,11 +64,11 @@ router.get('/', (req, res) => {
  *         description: Produto não encontrado
  */
 router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  productsDB = loadProducts();
-  const product = productsDB.find(p => p.id === id);
-  if (!product) return res.status(404).json({ erro: "Produto não encontrado!" });
-  res.json(product);
+    const id = req.params.id;
+    productsDB = loadProducts();
+    const product = productsDB.find(p => p.id === id);
+    if (!product) return res.status(404).json({ erro: "Produto não encontrado!" });
+    res.json(product);
 });
 
 /**
@@ -77,11 +101,11 @@ router.get('/:id', (req, res) => {
  *         description: Produto cadastrado com sucesso
  */
 router.post('/', (req, res) => {
-  const newProduct = { id: uuidv4(), ...req.body };
-  productsDB = loadProducts();
-  productsDB.push(newProduct);
-  saveProducts();
-  res.status(201).json(newProduct);
+    const newProduct = { id: uuidv4(), ...req.body };
+    productsDB = loadProducts();
+    productsDB.push(newProduct);
+    saveProducts();
+    res.status(201).json(newProduct);
 });
 
 /**
@@ -119,14 +143,13 @@ router.post('/', (req, res) => {
  *         description: Produto não encontrado
  */
 router.put('/:id', (req, res) => {
-  const id = req.params.id;
-  const newProduct = req.body;
-  productsDB = loadProducts();
-  const index = productsDB.findIndex(p => p.id === id);
-  if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
-  productsDB[index] = { id, ...newProduct };
-  saveProducts();
-  res.json(productsDB[index]);
+    const id = req.params.id;
+    productsDB = loadProducts();
+    const index = productsDB.findIndex(p => p.id === id);
+    if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
+    productsDB[index] = { id, ...req.body };
+    saveProducts();
+    res.json(productsDB[index]);
 });
 
 /**
@@ -149,11 +172,13 @@ router.put('/:id', (req, res) => {
  *         description: Produto não encontrado
  */
 router.delete('/:id', (req, res) => {
-  const id = req.params.id;
-  productsDB = loadProducts();
-  const index = productsDB.findIndex(p => p.id === id);
-  if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
-  const deleted = productsDB.splice(index, 1);
-  saveProducts();
-  res.json(deleted[0]);
+    const id = req.params.id;
+    productsDB = loadProducts();
+    const index = productsDB.findIndex(p => p.id === id);
+    if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
+    const deleted = productsDB.splice(index, 1);
+    saveProducts();
+    res.json(deleted[0]);
 });
+
+module.exports = router;
