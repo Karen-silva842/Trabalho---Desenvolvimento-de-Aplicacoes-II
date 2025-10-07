@@ -7,8 +7,8 @@ const swaggerSpec = require('./routes/swagger');
 // Importa as rotas
 const usersRoutes = require('./routes/usersRoutes');
 const suppliersRoutes = require('./routes/suppliersRoutes');
-const storesRoutes = require('./routes/storeRoutes');
-const productsRoutes = require('./routes/productRoutes');
+const storeRoutes = require('./routes/storeRoutes');
+const productRoutes = require('./routes/productRoutes');
 const ordersRoutes = require('./routes/orderRoutes');
 const campaignsRoutes = require('./routes/campaignRoutes');
 
@@ -17,8 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/users', usersRoutes);
 app.use('/supplier', suppliersRoutes);
-app.use('/store', storesRoutes);
-app.use('/products', productsRoutes);
+app.use('/store', storeRoutes);
+app.use('/products', productRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/campaigns', campaignsRoutes);
 
