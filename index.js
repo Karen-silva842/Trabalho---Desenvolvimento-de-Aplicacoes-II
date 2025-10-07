@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rotas da API
 app.use('/users', usersRoutes);
-app.use('/suppliers', suppliersRoutes);
+app.use('/supplier', suppliersRoutes);
 app.use('/stores', storesRoutes);
 app.use('/products', productsRoutes);
 app.use('/orders', ordersRoutes);
