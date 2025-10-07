@@ -27,7 +27,40 @@ function saveCampaigns() {
  * @swagger
  * tags:
  *   - name: Campanhas
- *     description: Rotas gerenciamento de Campanhas - Davi Mendes
+ *     description: Rotas de gerenciamento de campanhas
+ *
+ * components:
+ *   schemas:
+ *     Campaign:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: ID da campanha
+ *         supplier_id:
+ *           type: string
+ *           description: ID do fornecedor
+ *         name:
+ *           type: string
+ *           description: Nome da campanha
+ *         start_date:
+ *           type: string
+ *           format: date-time
+ *           description: Data e hora de início da campanha
+ *         end_date:
+ *           type: string
+ *           format: date-time
+ *           description: Data e hora de término da campanha
+ *         discount_percentage:
+ *           type: string
+ *           description: Porcentagem de desconto da campanha
+ *       required:
+ *         - id
+ *         - supplier_id
+ *         - name
+ *         - start_date
+ *         - end_date
+ *         - discount_percentage
  */
 
 /**
@@ -39,6 +72,12 @@ function saveCampaigns() {
  *     responses:
  *       200:
  *         description: Lista de campanhas retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
  */
 router.get('/', (req, res) => {
   campaignsDB = loadCampaigns();
@@ -61,6 +100,10 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Campanha encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
  *       404:
  *         description: Campanha não encontrada
  */
@@ -83,21 +126,14 @@ router.get('/:id', (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *               descricao:
- *                 type: string
- *               dataInicio:
- *                 type: string
- *                 format: date
- *               dataFim:
- *                 type: string
- *                 format: date
+ *             $ref: '#/components/schemas/Campaign'
  *     responses:
  *       201:
  *         description: Campanha criada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
  */
 router.post('/', (req, res) => {
   const newCampaign = { id: uuidv4(), ...req.body };
@@ -125,10 +161,14 @@ router.post('/', (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
+ *             $ref: '#/components/schemas/Campaign'
  *     responses:
  *       200:
  *         description: Campanha atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
  *       404:
  *         description: Campanha não encontrada
  */
@@ -160,6 +200,10 @@ router.put('/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Campanha removida com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
  *       404:
  *         description: Campanha não encontrada
  */
