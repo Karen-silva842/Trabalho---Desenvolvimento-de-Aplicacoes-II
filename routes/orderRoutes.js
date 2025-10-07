@@ -25,7 +25,7 @@ function saveOrders() {
 /**
  * @swagger
  * tags:
- *   - name: Orders
+ *   - name: Pedidos
  *     description: Rotas relacionadas a pedidos
  */
 

@@ -3,22 +3,22 @@ const router = express.Router()
 const { v4: uuidv4 } = require('uuid')
 const fs = require('fs')
 
-let suppliersDB = loadSuppliers()
+let usersDB = loadUsers()
 
-function loadSuppliers() {
+function loadUsers() {
   try {
-    return JSON.parse(fs.readFileSync('./data/suppliers.json', 'utf8'))
+    return JSON.parse(fs.readFileSync('./data/users.json', 'utf8'))
   } catch (err) {
     return []
   }
 }
 
-function saveSuppliers() {
+function saveUsers() {
   try {
-    fs.writeFileSync('./data/suppliers.json', JSON.stringify(suppliersDB, null, 2))
+    fs.writeFileSync('./data/users.json', JSON.stringify(usersDB, null, 2))
     return 'Salvo'
   } catch (err) {
-    console.error('Erro ao salvar fornecedores:', err)
+    console.error('Erro ao salvar usuários:', err)
     return 'Não salvo'
   }
 }
@@ -26,58 +26,58 @@ function saveSuppliers() {
 /**
  * @swagger
  * tags:
- *   - name: Fornecedores
- *     description: Rotas para gerenciamento de fornecedores
+ *   - name: Usuários
+ *     description: Rotas para gerenciamento de usuários
  */
 
 /**
  * @swagger
- * /supplier:
+ * /users:
  *   get:
- *     summary: Retorna todos os fornecedores cadastrados
- *     tags: [Fornecedores]
+ *     summary: Retorna todos os usuários cadastrados
+ *     tags: [Usuários]
  *     responses:
  *       200:
- *         description: Lista de fornecedores cadastrados
+ *         description: Lista de usuários cadastrados
  */
 router.get('/', (req, res) => {
-  suppliersDB = loadSuppliers()
-  res.json(suppliersDB)
+  usersDB = loadUsers()
+  res.json(usersDB)
 })
 
 /**
  * @swagger
- * /supplier/{id}:
+ * /users/{id}:
  *   get:
- *     summary: Retorna um fornecedor específico pelo ID
- *     tags: [Fornecedores]
+ *     summary: Retorna um usuário específico pelo ID
+ *     tags: [Usuários]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do fornecedor
+ *         description: ID do usuário
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Fornecedor encontrado
+ *         description: Usuário encontrado
  *       404:
- *         description: Fornecedor não encontrado
+ *         description: Usuário não encontrado
  */
 router.get('/:id', (req, res) => {
   const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const supplier = suppliersDB.find(s => s.id === id)
-  if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
-  res.json(supplier)
+  usersDB = loadUsers()
+  const user = usersDB.find(u => u.id === id)
+  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+  res.json(user)
 })
 
 /**
  * @swagger
- * /supplier:
+ * /users:
  *   post:
- *     summary: Cadastra um novo fornecedor
- *     tags: [Fornecedores]
+ *     summary: Cadastra um novo usuário
+ *     tags: [Usuários]
  *     requestBody:
  *       required: true
  *       content:
@@ -87,42 +87,39 @@ router.get('/:id', (req, res) => {
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nome do fornecedor
  *               email:
  *                 type: string
- *                 description: E-mail do fornecedor
- *               phone:
+ *               password:
  *                 type: string
- *                 description: Telefone do fornecedor
  *     responses:
  *       201:
- *         description: Fornecedor cadastrado com sucesso
+ *         description: Usuário cadastrado com sucesso
  *       400:
  *         description: Campos obrigatórios não preenchidos
  */
 router.post('/', (req, res) => {
-  const { name, email, phone } = req.body
-  if (!name || !email || !phone)
+  const { name, email, password } = req.body
+  if (!name || !email || !password)
     return res.status(400).json({ erro: 'Preencha todos os campos!' })
 
-  suppliersDB = loadSuppliers()
-  const newSupplier = { id: uuidv4(), name, email, phone }
-  suppliersDB.push(newSupplier)
-  saveSuppliers()
-  res.status(201).json(newSupplier)
+  usersDB = loadUsers()
+  const newUser = { id: uuidv4(), name, email, password }
+  usersDB.push(newUser)
+  saveUsers()
+  res.status(201).json(newUser)
 })
 
 /**
  * @swagger
- * /supplier/{id}:
+ * /users/{id}:
  *   put:
- *     summary: Atualiza um fornecedor existente
- *     tags: [Fornecedores]
+ *     summary: Atualiza um usuário existente
+ *     tags: [Usuários]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do fornecedor
+ *         description: ID do usuário
  *         schema:
  *           type: string
  *     requestBody:
@@ -136,52 +133,52 @@ router.post('/', (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
- *               phone:
+ *               password:
  *                 type: string
  *     responses:
  *       200:
- *         description: Fornecedor atualizado com sucesso
+ *         description: Usuário atualizado com sucesso
  *       404:
- *         description: Fornecedor não encontrado
+ *         description: Usuário não encontrado
  */
 router.put('/:id', (req, res) => {
   const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const index = suppliersDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
+  usersDB = loadUsers()
+  const index = usersDB.findIndex(u => u.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
 
-  suppliersDB[index] = { ...suppliersDB[index], ...req.body, id }
-  saveSuppliers()
-  res.json(suppliersDB[index])
+  usersDB[index] = { ...usersDB[index], ...req.body, id }
+  saveUsers()
+  res.json(usersDB[index])
 })
 
 /**
  * @swagger
- * /supplier/{id}:
+ * /users/{id}:
  *   delete:
- *     summary: Exclui um fornecedor pelo ID
- *     tags: [Fornecedores]
+ *     summary: Exclui um usuário pelo ID
+ *     tags: [Usuários]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do fornecedor
+ *         description: ID do usuário
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Fornecedor excluído com sucesso
+ *         description: Usuário excluído com sucesso
  *       404:
- *         description: Fornecedor não encontrado
+ *         description: Usuário não encontrado
  */
 router.delete('/:id', (req, res) => {
   const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const index = suppliersDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
+  usersDB = loadUsers()
+  const index = usersDB.findIndex(u => u.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
 
-  const deleted = suppliersDB.splice(index, 1)
-  saveSuppliers()
+  const deleted = usersDB.splice(index, 1)
+  saveUsers()
   res.json(deleted[0])
 })
 

@@ -25,7 +25,7 @@ function saveCampaigns() {
 /**
  * @swagger
  * tags:
- *   - name: Campaigns
+ *   - name: Campanhas
  *     description: Rotas relacionadas às campanhas promocionais
  */
 
