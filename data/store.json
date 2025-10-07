@@ -1,11 +1,13 @@
 [
   {
     "id": "1f8e2d3c-7a4b-4f6c-8a9b-2c3d1e5f6a7b",
-    "store_name": "Loja Central",
+    "store_name": "Centauro",
     "cnpj": "12.345.678/0001-90",
-    "address": "Rua Principal, 100",
-    "phone_number": "48 99999-0000",
-    "contact_email": "central@loja.com",
+    "address": "Rua José Augusto, 42",
+    "phone_number": "48 9658-9696",
+    "contact_email": "centauro@loja.com",
     "status": "on"
   }
 ]
+
+
