@@ -27,7 +27,7 @@ function saveUsers() {
  * @swagger
  * tags:
  *   - name: Usuários
- *     description: Rotas de gerenciamento de usuários - Karen Suélen da Silva
+ *     description: "Rotas de gerenciamento de usuários - Karen Suélen da Silva"
  */
 
 /**
@@ -55,7 +55,7 @@ router.get('/', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do usuário
+ *         description: "ID do usuário"
  *         schema:
  *           type: string
  *     responses:
@@ -94,18 +94,22 @@ router.get('/:id', (req, res) => {
  *             properties:
  *               name:
  *                 type: string
+ *                 description: "Nome do usuário"
  *               contact_email:
  *                 type: string
+ *                 description: "E-mail de contato do usuário"
  *               user:
  *                 type: string
+ *                 description: "Login do usuário"
  *               pwd:
  *                 type: string
+ *                 description: "Senha do usuário"
  *               level:
  *                 type: string
- *                 description: nível do usuário (ex: presidente, admin, vendedor)
+ *                 description: "Nível do usuário (ex: presidente, admin, vendedor)"
  *               status:
  *                 type: string
- *                 description: status do usuário (on/off)
+ *                 description: "Status do usuário (on/off)"
  *     responses:
  *       201:
  *         description: Usuário cadastrado com sucesso
@@ -134,7 +138,7 @@ router.post('/', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do usuário
+ *         description: "ID do usuário"
  *         schema:
  *           type: string
  *     requestBody:
@@ -146,16 +150,22 @@ router.post('/', (req, res) => {
  *             properties:
  *               name:
  *                 type: string
+ *                 description: "Nome do usuário"
  *               contact_email:
  *                 type: string
+ *                 description: "E-mail de contato do usuário"
  *               user:
  *                 type: string
+ *                 description: "Login do usuário"
  *               pwd:
  *                 type: string
+ *                 description: "Senha do usuário"
  *               level:
  *                 type: string
+ *                 description: "Nível do usuário (ex: presidente, admin, vendedor)"
  *               status:
  *                 type: string
+ *                 description: "Status do usuário (on/off)"
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso
@@ -183,7 +193,7 @@ router.put('/:id', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do usuário
+ *         description: "ID do usuário"
  *         schema:
  *           type: string
  *     responses:
