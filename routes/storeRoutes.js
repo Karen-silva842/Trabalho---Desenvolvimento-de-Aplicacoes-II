@@ -27,7 +27,35 @@ function saveStores() {
  * @swagger
  * tags:
  *   - name: Lojas
- *     description: Rotas gerenciamento de lojas - Bryan Gonçalves Pereira
+ *     description: Rotas de gerenciamento de lojas - Bryan Gonçalves Pereira
+ *
+ * components:
+ *   schemas:
+ *     Store:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         store_name:
+ *           type: string
+ *         cnpj:
+ *           type: string
+ *         address:
+ *           type: string
+ *         phone_number:
+ *           type: string
+ *         contact_email:
+ *           type: string
+ *         status:
+ *           type: string
+ *       required:
+ *         - id
+ *         - store_name
+ *         - cnpj
+ *         - address
+ *         - phone_number
+ *         - contact_email
+ *         - status
  */
 
 /**
@@ -38,7 +66,13 @@ function saveStores() {
  *     tags: [Lojas]
  *     responses:
  *       200:
- *         description: Lista de todas as lojas cadastradas
+ *         description: Lista de todas as lojas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Store'
  */
 router.get('/', (req, res) => {
   storesDB = loadStores()
@@ -61,6 +95,10 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Loja encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Store'
  *       404:
  *         description: Loja não encontrada
  */
@@ -85,25 +123,33 @@ router.get('/:id', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               nome:
+ *               store_name:
  *                 type: string
- *                 description: Nome da loja
- *               endereco:
+ *               cnpj:
  *                 type: string
- *                 description: Endereço da loja
- *               telefone:
+ *               address:
  *                 type: string
- *                 description: Telefone de contato
+ *               phone_number:
+ *                 type: string
+ *               contact_email:
+ *                 type: string
+ *               status:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Loja criada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Store'
  */
 router.post('/', (req, res) => {
-  if (!req.body.nome || !req.body.endereco || !req.body.telefone) {
+  const { store_name, cnpj, address, phone_number, contact_email, status } = req.body
+  if (!store_name || !cnpj || !address || !phone_number || !contact_email || !status) {
     return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' })
   }
 
-  const newStore = { id: uuidv4(), ...req.body }
+  const newStore = { id: uuidv4(), store_name, cnpj, address, phone_number, contact_email, status }
   storesDB = loadStores()
   storesDB.push(newStore)
   saveStores()
@@ -130,28 +176,35 @@ router.post('/', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               nome:
+ *               store_name:
  *                 type: string
- *                 description: Nome da loja
- *               endereco:
+ *               cnpj:
  *                 type: string
- *                 description: Endereço da loja
- *               telefone:
+ *               address:
  *                 type: string
- *                 description: Telefone de contato
+ *               phone_number:
+ *                 type: string
+ *               contact_email:
+ *                 type: string
+ *               status:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Loja atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Store'
  *       404:
  *         description: Loja não encontrada
  */
 router.put('/:id', (req, res) => {
   const id = req.params.id
-  const newStore = req.body
+  const { store_name, cnpj, address, phone_number, contact_email, status } = req.body
   storesDB = loadStores()
   const index = storesDB.findIndex(s => s.id === id)
   if (index === -1) return res.status(404).json({ erro: 'Loja não encontrada!' })
-  storesDB[index] = { id, ...newStore }
+  storesDB[index] = { id, store_name, cnpj, address, phone_number, contact_email, status }
   saveStores()
   res.json(storesDB[index])
 })
@@ -172,6 +225,10 @@ router.put('/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Loja removida com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Store'
  *       404:
  *         description: Loja não encontrada
  */

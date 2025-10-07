@@ -27,7 +27,25 @@ function saveSuppliers() {
  * @swagger
  * tags:
  *   - name: Fornecedores
- *     description: Rotas gerenciamento de fornecedores - Karen Suélen da Silva
+ *     description: Rotas de gerenciamento de fornecedores - Karen Suélen da Silva
+ *
+ * components:
+ *   schemas:
+ *     Supplier:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         supplier_name:
+ *           type: string
+ *         supplier_category:
+ *           type: string
+ *         contact_email:
+ *           type: string
+ *         phone_number:
+ *           type: string
+ *         status:
+ *           type: string
  */
 
 /**
@@ -39,6 +57,12 @@ function saveSuppliers() {
  *     responses:
  *       200:
  *         description: Lista de fornecedores cadastrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Supplier'
  */
 router.get('/', (req, res) => {
   suppliersDB = loadSuppliers()
@@ -61,6 +85,10 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Fornecedor encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Supplier'
  *       404:
  *         description: Fornecedor não encontrado
  */
@@ -85,31 +113,33 @@ router.get('/:id', (req, res) => {
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - phone
+ *               - supplier_name
+ *               - supplier_category
+ *               - contact_email
+ *               - phone_number
  *             properties:
- *               name:
+ *               supplier_name:
  *                 type: string
- *                 description: Nome do fornecedor
- *               email:
+ *               supplier_category:
  *                 type: string
- *                 description: E-mail do fornecedor
- *               phone:
+ *               contact_email:
  *                 type: string
- *                 description: Telefone do fornecedor
+ *               phone_number:
+ *                 type: string
+ *               status:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Fornecedor cadastrado com sucesso
- *       400:
- *         description: Campos obrigatórios não preenchidos
  */
 router.post('/', (req, res) => {
-  const { name, email, phone } = req.body
-  if (!name || !email || !phone) return res.status(400).json({ erro: 'Preencha todos os campos!' })
+  const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body
+  if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
+    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios!' })
+  }
 
   suppliersDB = loadSuppliers()
-  const newSupplier = { id: uuidv4(), name, email, phone }
+  const newSupplier = { id: uuidv4(), supplier_name, supplier_category, contact_email, phone_number, status: status || 'on' }
   suppliersDB.push(newSupplier)
   saveSuppliers()
   res.status(201).json(newSupplier)
@@ -125,7 +155,6 @@ router.post('/', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do fornecedor
  *         schema:
  *           type: string
  *     requestBody:
@@ -135,11 +164,15 @@ router.post('/', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               supplier_name:
  *                 type: string
- *               email:
+ *               supplier_category:
  *                 type: string
- *               phone:
+ *               contact_email:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
+ *               status:
  *                 type: string
  *     responses:
  *       200:
@@ -168,7 +201,6 @@ router.put('/:id', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do fornecedor
  *         schema:
  *           type: string
  *     responses:
@@ -185,7 +217,7 @@ router.delete('/:id', (req, res) => {
 
   const deleted = suppliersDB.splice(index, 1)
   saveSuppliers()
-  res.json(deleted[0]) // retorna apenas o objeto excluído
+  res.json(deleted[0])
 })
 
 module.exports = router

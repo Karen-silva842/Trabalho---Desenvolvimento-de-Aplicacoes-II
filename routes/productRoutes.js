@@ -26,7 +26,35 @@ function saveProducts() {
  * @swagger
  * tags:
  *   - name: Produtos
- *     description: Rotas gerenciamento de produtos - Bryan Gonçalves Pereira
+ *     description: Rotas de gerenciamento de produtos - Bryan Gonçalves Pereira
+ *
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         price:
+ *           type: string
+ *         stock_quantity:
+ *           type: string
+ *         supplier_id:
+ *           type: string
+ *         status:
+ *           type: string
+ *       required:
+ *         - id
+ *         - name
+ *         - description
+ *         - price
+ *         - stock_quantity
+ *         - supplier_id
+ *         - status
  */
 
 /**
@@ -37,7 +65,13 @@ function saveProducts() {
  *     tags: [Produtos]
  *     responses:
  *       200:
- *         description: Lista de produtos cadastrados
+ *         description: Lista de produtos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
  */
 router.get('/', (req, res) => {
     productsDB = loadProducts();
@@ -60,6 +94,10 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Produto encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
  *       404:
  *         description: Produto não encontrado
  */
@@ -84,21 +122,25 @@ router.get('/:id', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               nome:
+ *               name:
  *                 type: string
- *                 description: Nome do produto
- *               preco:
- *                 type: number
- *                 description: Preço do produto
- *               descricao:
+ *               description:
  *                 type: string
- *                 description: Descrição do produto
- *               estoque:
- *                 type: integer
- *                 description: Quantidade em estoque
+ *               price:
+ *                 type: string
+ *               stock_quantity:
+ *                 type: string
+ *               supplier_id:
+ *                 type: string
+ *               status:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Produto cadastrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
  */
 router.post('/', (req, res) => {
     const newProduct = { id: uuidv4(), ...req.body };
@@ -128,17 +170,25 @@ router.post('/', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               nome:
+ *               name:
  *                 type: string
- *               preco:
- *                 type: number
- *               descricao:
+ *               description:
  *                 type: string
- *               estoque:
- *                 type: integer
+ *               price:
+ *                 type: string
+ *               stock_quantity:
+ *                 type: string
+ *               supplier_id:
+ *                 type: string
+ *               status:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Produto atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
  *       404:
  *         description: Produto não encontrado
  */
@@ -168,6 +218,10 @@ router.put('/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Produto excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
  *       404:
  *         description: Produto não encontrado
  */

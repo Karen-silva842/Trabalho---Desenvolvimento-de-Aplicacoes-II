@@ -27,7 +27,51 @@ function saveOrders() {
  * @swagger
  * tags:
  *   - name: Pedidos
- *     description: Rotas gerenciamento de Pedidos - Davi Mendes
+ *     description: Rotas de gerenciamento de pedidos - Davi Mendes
+ *
+ * components:
+ *   schemas:
+ *     OrderItem:
+ *       type: object
+ *       properties:
+ *         product_id:
+ *           type: string
+ *         quantity:
+ *           type: number
+ *         campaign_id:
+ *           type: string
+ *         unit_price:
+ *           type: string
+ *       required:
+ *         - product_id
+ *         - quantity
+ *         - unit_price
+ *
+ *     Order:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         store_id:
+ *           type: string
+ *         item:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *         total_amount:
+ *           type: string
+ *         status:
+ *           type: string
+ *         date:
+ *           type: string
+ *           format: date-time
+ *       required:
+ *         - id
+ *         - store_id
+ *         - item
+ *         - total_amount
+ *         - status
+ *         - date
  */
 
 /**
@@ -39,6 +83,12 @@ function saveOrders() {
  *     responses:
  *       200:
  *         description: Lista de pedidos retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
  */
 router.get('/', (req, res) => {
   ordersDB = loadOrders();
@@ -61,6 +111,10 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Pedido encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
  *       404:
  *         description: Pedido não encontrado
  */
@@ -83,24 +137,14 @@ router.get('/:id', (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               cliente:
- *                 type: string
- *               itens:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     produto:
- *                       type: string
- *                     quantidade:
- *                       type: number
- *                     valorTotal:
- *                       type: number
+ *             $ref: '#/components/schemas/Order'
  *     responses:
  *       201:
  *         description: Pedido criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
  */
 router.post('/', (req, res) => {
   const newOrder = { id: uuidv4(), ...req.body };
@@ -128,10 +172,14 @@ router.post('/', (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
+ *             $ref: '#/components/schemas/Order'
  *     responses:
  *       200:
  *         description: Pedido atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
  *       404:
  *         description: Pedido não encontrado
  */
@@ -163,6 +211,10 @@ router.put('/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Pedido excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
  *       404:
  *         description: Pedido não encontrado
  */

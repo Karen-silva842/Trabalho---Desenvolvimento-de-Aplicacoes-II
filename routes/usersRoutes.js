@@ -27,7 +27,7 @@ function saveUsers() {
  * @swagger
  * tags:
  *   - name: Usuários
- *     description: Rotas gerenciamento de usuários - Karen Suélen da Silva
+ *     description: Rotas de gerenciamento de usuários - Karen Suélen da Silva
  */
 
 /**
@@ -84,13 +84,28 @@ router.get('/:id', (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - contact_email
+ *               - user
+ *               - pwd
+ *               - level
+ *               - status
  *             properties:
  *               name:
  *                 type: string
- *               email:
+ *               contact_email:
  *                 type: string
- *               password:
+ *               user:
  *                 type: string
+ *               pwd:
+ *                 type: string
+ *               level:
+ *                 type: string
+ *                 description: nível do usuário (ex: presidente, admin, vendedor)
+ *               status:
+ *                 type: string
+ *                 description: status do usuário (on/off)
  *     responses:
  *       201:
  *         description: Usuário cadastrado com sucesso
@@ -98,12 +113,12 @@ router.get('/:id', (req, res) => {
  *         description: Campos obrigatórios não preenchidos
  */
 router.post('/', (req, res) => {
-  const { name, email, password } = req.body
-  if (!name || !email || !password)
+  const { name, contact_email, user, pwd, level, status } = req.body
+  if (!name || !contact_email || !user || !pwd || !level || !status)
     return res.status(400).json({ erro: 'Preencha todos os campos!' })
 
   usersDB = loadUsers()
-  const newUser = { id: uuidv4(), name, email, password }
+  const newUser = { id: uuidv4(), name, contact_email, user, pwd, level, status }
   usersDB.push(newUser)
   saveUsers()
   res.status(201).json(newUser)
@@ -131,9 +146,15 @@ router.post('/', (req, res) => {
  *             properties:
  *               name:
  *                 type: string
- *               email:
+ *               contact_email:
  *                 type: string
- *               password:
+ *               user:
+ *                 type: string
+ *               pwd:
+ *                 type: string
+ *               level:
+ *                 type: string
+ *               status:
  *                 type: string
  *     responses:
  *       200:
