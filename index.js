@@ -12,14 +12,12 @@ const productsRoutes = require('./routes/productRoutes');
 const ordersRoutes = require('./routes/orderRoutes');
 const campaignsRoutes = require('./routes/campaignRoutes');
 
-// Middleware para ler JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas da API
 app.use('/users', usersRoutes);
 app.use('/supplier', suppliersRoutes);
-app.use('/stores', storesRoutes);
+app.use('/store', storesRoutes);
 app.use('/products', productsRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/campaigns', campaignsRoutes);
