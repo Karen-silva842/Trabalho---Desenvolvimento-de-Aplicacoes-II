@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swagger');
+const swaggerSpec = require('./routes/swagger');
 
 // Importa as rotas
 const usersRoutes = require('./routes/usersRoutes');
