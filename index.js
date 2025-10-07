@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/users', usersRoutes);
 app.use('/supplier', suppliersRoutes);
 app.use('/store', storeRoutes);
-app.use('/products', productRoutes);
+app.use('/product', productRoutes);
 app.use('/orders', orderRoutes);
 app.use('/campaigns', campaignRoutes);
 
