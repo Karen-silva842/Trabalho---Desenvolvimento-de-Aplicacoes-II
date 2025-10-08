@@ -5,7 +5,7 @@ const fs = require('fs')
 
 let usersDB = loadUsers()
 
-//Para ler ao arquivo
+//Para ler o arquivo
 function loadUsers() {
   try {
     return JSON.parse(fs.readFileSync('./data/users.json', 'utf8'))
