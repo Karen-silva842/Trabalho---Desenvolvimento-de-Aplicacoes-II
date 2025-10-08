@@ -89,7 +89,7 @@ router.get('/', (req, res) => {
  * @swagger
  * /orders/search:
  *   get:
- *     summary: Busca pedidos por ID, nome do produto e data
+ *     summary: Busca pedidos por ID e data
  *     tags: [Pedidos]
  *     parameters:
  *       - in: query
@@ -97,11 +97,6 @@ router.get('/', (req, res) => {
  *         schema:
  *           type: string
  *         description: Filtra pedido pelo ID
- *       - in: query
- *         name: product_name
- *         schema:
- *           type: string
- *         description: Filtra pedido pelo nome do produto
  *       - in: query
  *         name: date
  *         schema:
@@ -120,12 +115,11 @@ router.get('/', (req, res) => {
  */
 router.get('/search', (req, res) => {
   ordersDB = loadOrders();
-  const { id, product_name, date } = req.query;
+  const { id, date } = req.query;
 
   let filtered = ordersDB;
 
   if (id) filtered = filtered.filter(o => o.id === id);
-  if (product_name) filtered = filtered.filter(o => o.product_name && o.product_name.toLowerCase().includes(product_name.toLowerCase()));
   if (date) filtered = filtered.filter(o => o.date === date);
 
   res.json(filtered);
