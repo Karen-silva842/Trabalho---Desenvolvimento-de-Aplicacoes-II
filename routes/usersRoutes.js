@@ -55,6 +55,9 @@ function saveUsers() {
  *         status:
  *           type: string
  *           description: "Status do usuário (on/off)"
+ *         date:
+ *           type: string
+ *           description: "Data de criação do usuário (YYYY-MM-DD)"
  *       required:
  *         - id
  *         - name
@@ -69,91 +72,82 @@ function saveUsers() {
  * @swagger
  * /users:
  *   get:
- *     summary: Retorna todos os usuários cadastrados
- *     tags: [Usuários]
- *     responses:
- *       200:
- *         description: Lista de usuários cadastrados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
- */
-router.get('/', (req, res) => {
-  usersDB = loadUsers()
-  res.json(usersDB)
-})
-
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Retorna um usuário específico pelo ID, nome ou data de criação
+ *     summary: Retorna todos os usuários ou busca por id, name ou date
  *     tags: [Usuários]
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: id
- *         required: false
- *         description: "ID do usuário (ou use name/date como query params)"
  *         schema:
  *           type: string
+ *         description: "ID do usuário"
  *       - in: query
  *         name: name
- *         required: false
  *         schema:
  *           type: string
- *         description: "Nome (busca parcial)"
+ *         description: "Nome do usuário"
  *       - in: query
  *         name: date
- *         required: false
  *         schema:
  *           type: string
- *           format: date
- *         description: "Data de criação (AAAA-MM-DD)"
+ *         description: "Data de criação do usuário (YYYY-MM-DD)"
  *     responses:
  *       200:
  *         description: Usuário(s) encontrado(s)
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/User'
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
  *       404:
- *         description: Nenhum usuário encontrado
+ *         description: Usuário não encontrado
+ */
+router.get('/', (req, res) => {
+  usersDB = loadUsers()
+  const { id, name, date } = req.query
+
+  let results = usersDB
+
+  if (id) results = results.filter(u => u.id === id)
+  if (name) results = results.filter(u => u.name.toLowerCase().includes(name.toLowerCase()))
+  if (date) results = results.filter(u => u.date && u.date.includes(date))
+
+  if (results.length === 0) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+
+  res.json(results.length === 1 ? results[0] : results)
+})
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Retorna um usuário específico pelo ID
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário"
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
  */
 router.get('/:id', (req, res) => {
   const id = req.params.id
-  const { name, date } = req.query
   usersDB = loadUsers()
-
-  let results = []
-
-  if (id) {
-    const user = usersDB.find(u => u.id === id)
-    if (user) results.push(user)
-  }
-  if (name) {
-    results = results.concat(
-      usersDB.filter(u =>
-        u.name.toLowerCase().includes(name.toLowerCase())
-      )
-    )
-  }
-  if (date) {
-    results = results.concat(
-      usersDB.filter(u =>
-        u.created_at && u.created_at.startsWith(date)
-      )
-    )
-  }
-
-  if (results.length === 0)
-    return res.status(404).json({ erro: 'Usuário não encontrado!' })
-
-  res.json(results)
+  const user = usersDB.find(u => u.id === id)
+  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+  res.json(user)
 })
 
 /**
@@ -180,47 +174,12 @@ router.post('/', (req, res) => {
     return res.status(400).json({ erro: 'Preencha todos os campos!' })
 
   usersDB = loadUsers()
-  const newUser = {
-    id: uuidv4(),
-    name,
-    contact_email,
-    user,
-    pwd,
-    level,
-    status,
-    created_at: new Date().toISOString().split('T')[0]
-  }
-
+  const newUser = { id: uuidv4(), name, contact_email, user, pwd, level, status }
   usersDB.push(newUser)
   saveUsers()
   res.status(201).json(newUser)
 })
 
-/**
- * @swagger
- * /users/{id}:
- *   put:
- *     summary: Atualiza um usuário existente
- *     tags: [Usuários]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: "ID do usuário"
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *     responses:
- *       200:
- *         description: Usuário atualizado com sucesso
- *       404:
- *         description: Usuário não encontrado
- */
 router.put('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
@@ -232,25 +191,6 @@ router.put('/:id', (req, res) => {
   res.json(usersDB[index])
 })
 
-/**
- * @swagger
- * /users/{id}:
- *   delete:
- *     summary: Exclui um usuário pelo ID
- *     tags: [Usuários]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: "ID do usuário"
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Usuário excluído com sucesso
- *       404:
- *         description: Usuário não encontrado
- */
 router.delete('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
