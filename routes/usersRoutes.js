@@ -98,6 +98,8 @@ function saveUsers() {
  *       404:
  *         description: Usuário não encontrado
  */
+
+//Busca por id ou nome
 router.get('/', (req, res) => {
   usersDB = loadUsers()
   const { id, name } = req.query
@@ -162,7 +164,7 @@ router.get('/all', (req, res) => {
  *         description: Usuário não encontrado
  */
 
-//Busca por id ou nome
+//Busca por id um usuario especifico
 router.get('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
