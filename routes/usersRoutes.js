@@ -55,9 +55,6 @@ function saveUsers() {
  *         status:
  *           type: string
  *           description: "Status do usuário (on/off)"
- *         date:
- *           type: string
- *           description: "Data de criação do usuário (YYYY-MM-DD)"
  *       required:
  *         - id
  *         - name
@@ -72,7 +69,7 @@ function saveUsers() {
  * @swagger
  * /users:
  *   get:
- *     summary: Retorna todos os usuários ou busca por id, name ou date
+ *     summary: Retorna todos os usuários ou busca por id ou name
  *     tags: [Usuários]
  *     parameters:
  *       - in: query
@@ -85,11 +82,6 @@ function saveUsers() {
  *         schema:
  *           type: string
  *         description: "Nome do usuário"
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *         description: "Data de criação do usuário (YYYY-MM-DD)"
  *     responses:
  *       200:
  *         description: Usuário(s) encontrado(s)
@@ -106,13 +98,12 @@ function saveUsers() {
  */
 router.get('/', (req, res) => {
   usersDB = loadUsers()
-  const { id, name, date } = req.query
+  const { id, name } = req.query
 
   let results = usersDB
 
   if (id) results = results.filter(u => u.id === id)
   if (name) results = results.filter(u => u.name.toLowerCase().includes(name.toLowerCase()))
-  if (date) results = results.filter(u => u.date && u.date.includes(date))
 
   if (results.length === 0) return res.status(404).json({ erro: 'Usuário não encontrado!' })
 
