@@ -180,17 +180,74 @@ router.post('/', (req, res) => {
   res.status(201).json(newUser)
 })
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Atualiza um usuário existente
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário a ser atualizado"
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
 router.put('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
   const index = usersDB.findIndex(u => u.id === id)
   if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
 
-  usersDB[index] = { ...usersDB[index], ...req.body, id }
+  const { name, contact_email, user, pwd, level, status } = req.body
+  if (!name || !contact_email || !user || !pwd || !level || !status)
+    return res.status(400).json({ erro: 'Campos obrigatórios faltando!' })
+
+  const updatedUser = { id, name, contact_email, user, pwd, level, status }
+  usersDB[index] = updatedUser
   saveUsers()
-  res.json(usersDB[index])
+  res.json(updatedUser)
 })
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Remove um usuário existente
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário a ser removido"
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Usuário removido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
 router.delete('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
