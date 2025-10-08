@@ -71,37 +71,6 @@ router.get('/', (req, res) => {
 
 /**
  * @swagger
- * /supplier/{id}:
- *   get:
- *     summary: Retorna um fornecedor específico pelo ID
- *     tags: [Fornecedores]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID do fornecedor
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Fornecedor encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Supplier'
- *       404:
- *         description: Fornecedor não encontrado
- */
-router.get('/:id', (req, res) => {
-  const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const supplier = suppliersDB.find(s => s.id === id)
-  if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
-  res.json(supplier)
-})
-
-/**
- * @swagger
  * /supplier/search:
  *   get:
  *     summary: Busca fornecedores por id ou nome
@@ -141,6 +110,37 @@ router.get('/search', (req, res) => {
   }
 
   res.json(results)
+})
+
+/**
+ * @swagger
+ * /supplier/{id}:
+ *   get:
+ *     summary: Retorna um fornecedor específico pelo ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do fornecedor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Fornecedor encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Supplier'
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
+router.get('/:id', (req, res) => {
+  const id = req.params.id
+  suppliersDB = loadSuppliers()
+  const supplier = suppliersDB.find(s => s.id === id)
+  if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
+  res.json(supplier)
 })
 
 /**
