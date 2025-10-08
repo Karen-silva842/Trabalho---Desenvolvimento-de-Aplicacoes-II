@@ -53,6 +53,8 @@ function saveOrders() {
  *         date:
  *           type: string
  *           format: date-time
+ *         name:
+ *           type: string
  *       required:
  *         - id
  *         - store_id
@@ -62,24 +64,101 @@ function saveOrders() {
  *         - total_amount
  *         - status
  *         - date
+ *         - name
  */
 
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: Lista todos os pedidos
+ *     tags: [Pedidos]
+ *     responses:
+ *       200:
+ *         description: Lista de pedidos retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
 router.get('/', (req, res) => {
   ordersDB = loadOrders();
-  const { id, store_id, product_id, date } = req.query;
+  res.json(ordersDB);
+});
 
+/**
+ * @swagger
+ * /orders/search:
+ *   get:
+ *     summary: Busca pedidos por ID, nome ou data
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID do pedido
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Nome do pedido
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Data do pedido (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Pedidos encontrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Nenhum pedido encontrado
+ */
+router.get('/search', (req, res) => {
+  const { id, name, date } = req.query;
+  ordersDB = loadOrders();
   let results = ordersDB;
 
   if (id) results = results.filter(o => o.id === id);
-  if (store_id) results = results.filter(o => o.store_id === store_id);
-  if (product_id) results = results.filter(o => o.product_id === product_id);
-  if (date) results = results.filter(o => o.date && o.date.includes(date));
+  if (name) results = results.filter(o => o.name.toLowerCase().includes(name.toLowerCase()));
+  if (date) results = results.filter(o => o.date.startsWith(date));
 
-  if (results.length === 0) return res.status(404).json({ erro: 'Pedido não encontrado!' });
-
-  res.json(results.length === 1 ? results[0] : results);
+  if (results.length === 0) return res.status(404).json({ erro: 'Nenhum pedido encontrado!' });
+  res.json(results);
 });
 
+/**
+ * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Retorna um pedido específico pelo ID
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do pedido
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pedido encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.get('/:id', (req, res) => {
   const id = req.params.id;
   ordersDB = loadOrders();
