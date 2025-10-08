@@ -54,17 +54,6 @@ function saveSuppliers() {
  *   get:
  *     summary: Retorna todos os fornecedores cadastrados
  *     tags: [Fornecedores]
- *     parameters:
- *       - in: query
- *         name: supplier_name
- *         schema:
- *           type: string
- *         description: Nome do fornecedor para filtro
- *       - in: query
- *         name: created_at
- *         schema:
- *           type: string
- *         description: Data de criação do fornecedor para filtro
  *     responses:
  *       200:
  *         description: Lista de fornecedores cadastrados
@@ -91,6 +80,29 @@ router.get('/', (req, res) => {
   res.json(result)
 })
 
+/**
+ * @swagger
+ * /supplier/{id}:
+ *   get:
+ *     summary: Retorna um fornecedor específico pelo ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do fornecedor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Fornecedor encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Supplier'
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.get('/:id', (req, res) => {
   const id = req.params.id
   suppliersDB = loadSuppliers()
@@ -99,6 +111,38 @@ router.get('/:id', (req, res) => {
   res.json(supplier)
 })
 
+/**
+ * @swagger
+ * /supplier:
+ *   post:
+ *     summary: Cadastra um novo fornecedor
+ *     tags: [Fornecedores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - supplier_name
+ *               - supplier_category
+ *               - contact_email
+ *               - phone_number
+ *             properties:
+ *               supplier_name:
+ *                 type: string
+ *               supplier_category:
+ *                 type: string
+ *               contact_email:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Fornecedor cadastrado com sucesso
+ */
 router.post('/', (req, res) => {
   const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body
   if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
@@ -120,6 +164,41 @@ router.post('/', (req, res) => {
   res.status(201).json(newSupplier)
 })
 
+/**
+ * @swagger
+ * /supplier/{id}:
+ *   put:
+ *     summary: Atualiza um fornecedor existente
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               supplier_name:
+ *                 type: string
+ *               supplier_category:
+ *                 type: string
+ *               contact_email:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Fornecedor atualizado com sucesso
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.put('/:id', (req, res) => {
   const id = req.params.id
   suppliersDB = loadSuppliers()
@@ -131,6 +210,24 @@ router.put('/:id', (req, res) => {
   res.json(suppliersDB[index])
 })
 
+/**
+ * @swagger
+ * /supplier/{id}:
+ *   delete:
+ *     summary: Exclui um fornecedor pelo ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Fornecedor excluído com sucesso
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.delete('/:id', (req, res) => {
   const id = req.params.id
   suppliersDB = loadSuppliers()
