@@ -90,31 +90,70 @@ router.get('/', (req, res) => {
  * @swagger
  * /users/{id}:
  *   get:
- *     summary: Retorna um usuário específico pelo ID
+ *     summary: Retorna um usuário específico pelo ID, nome ou data de criação
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
  *         name: id
- *         required: true
- *         description: "ID do usuário"
+ *         required: false
+ *         description: "ID do usuário (ou use name/date como query params)"
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: name
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: "Nome (busca parcial)"
+ *       - in: query
+ *         name: date
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: "Data de criação (AAAA-MM-DD)"
  *     responses:
  *       200:
- *         description: Usuário encontrado
+ *         description: Usuário(s) encontrado(s)
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
  *       404:
- *         description: Usuário não encontrado
+ *         description: Nenhum usuário encontrado
  */
 router.get('/:id', (req, res) => {
   const id = req.params.id
+  const { name, date } = req.query
   usersDB = loadUsers()
-  const user = usersDB.find(u => u.id === id)
-  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' })
-  res.json(user)
+
+  let results = []
+
+  if (id) {
+    const user = usersDB.find(u => u.id === id)
+    if (user) results.push(user)
+  }
+  if (name) {
+    results = results.concat(
+      usersDB.filter(u =>
+        u.name.toLowerCase().includes(name.toLowerCase())
+      )
+    )
+  }
+  if (date) {
+    results = results.concat(
+      usersDB.filter(u =>
+        u.created_at && u.created_at.startsWith(date)
+      )
+    )
+  }
+
+  if (results.length === 0)
+    return res.status(404).json({ erro: 'Usuário não encontrado!' })
+
+  res.json(results)
 })
 
 /**
@@ -141,7 +180,17 @@ router.post('/', (req, res) => {
     return res.status(400).json({ erro: 'Preencha todos os campos!' })
 
   usersDB = loadUsers()
-  const newUser = { id: uuidv4(), name, contact_email, user, pwd, level, status }
+  const newUser = {
+    id: uuidv4(),
+    name,
+    contact_email,
+    user,
+    pwd,
+    level,
+    status,
+    created_at: new Date().toISOString().split('T')[0]
+  }
+
   usersDB.push(newUser)
   saveUsers()
   res.status(201).json(newUser)
