@@ -65,6 +65,27 @@ function saveCampaigns() {
 
 /**
  * @swagger
+ * /campaigns/all:
+ *   get:
+ *     summary: Lista todas as campanhas cadastradas
+ *     tags: [Campanhas]
+ *     responses:
+ *       200:
+ *         description: Lista completa de campanhas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
+ */
+router.get('/all', (req, res) => {
+  campaignsDB = loadCampaigns();
+  res.json(campaignsDB);
+});
+
+/**
+ * @swagger
  * /campaigns:
  *   get:
  *     summary: Lista campanhas com filtro por ID, nome e datas
