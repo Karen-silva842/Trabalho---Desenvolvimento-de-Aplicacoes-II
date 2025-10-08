@@ -3,210 +3,204 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 
-let productsDB = loadProducts();
+let ordersDB = loadOrders();
 
-function loadProducts() {
-    try {
-        return JSON.parse(fs.readFileSync('./data/product.json', 'utf8'));
-    } catch (err) {
-        return [];
-    }
+function loadOrders() {
+  try {
+    return JSON.parse(fs.readFileSync('./data/order.json', 'utf8'));
+  } catch (err) {
+    return [];
+  }
 }
 
-function saveProducts() {
-    try {
-        fs.writeFileSync('./data/product.json', JSON.stringify(productsDB, null, 2));
-        return "Salvo";
-    } catch (err) {
-        return "Não salvo";
-    }
+function saveOrders() {
+  try {
+    fs.writeFileSync('./data/order.json', JSON.stringify(ordersDB, null, 2));
+    return 'Salvo';
+  } catch (err) {
+    console.error('Erro ao salvar pedidos:', err);
+    return 'Não salvo';
+  }
 }
 
 /**
  * @swagger
  * tags:
- *   - name: Produtos
- *     description: Rotas de gerenciamento de produtos - Bryan Gonçalves Pereira
+ *   - name: Pedidos
+ *     description: Rotas de gerenciamento de pedidos - Davi Mendes
  *
  * components:
  *   schemas:
- *     Product:
+ *     Order:
  *       type: object
  *       properties:
  *         id:
  *           type: string
- *         name:
+ *         store_id:
  *           type: string
- *         description:
+ *         product_id:
  *           type: string
- *         price:
+ *         quantity:
+ *           type: number
+ *         campaign_id:
  *           type: string
- *         stock_quantity:
+ *         unit_price:
  *           type: string
- *         supplier_id:
+ *         total_amount:
  *           type: string
  *         status:
  *           type: string
+ *         date:
+ *           type: string
+ *           format: date-time
  *       required:
  *         - id
- *         - name
- *         - description
- *         - price
- *         - stock_quantity
- *         - supplier_id
+ *         - store_id
+ *         - product_id
+ *         - quantity
+ *         - unit_price
+ *         - total_amount
  *         - status
+ *         - date
  */
 
 /**
  * @swagger
- * /product:
+ * /orders:
  *   get:
- *     summary: Retorna todos os produtos cadastrados
- *     tags: [Produtos]
+ *     summary: Lista todos os pedidos
+ *     tags: [Pedidos]
  *     responses:
  *       200:
- *         description: Lista de produtos
+ *         description: Lista de pedidos retornada com sucesso
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Product'
+ *                 $ref: '#/components/schemas/Order'
  */
 router.get('/', (req, res) => {
-    productsDB = loadProducts();
-    res.json(productsDB);
+  ordersDB = loadOrders();
+  res.json(ordersDB);
 });
 
 /**
  * @swagger
- * /product/search:
+ * /orders/search:
  *   get:
- *     summary: Busca produtos por ID, nome e data
- *     tags: [Produtos]
+ *     summary: Busca pedidos por ID, nome do produto e data
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: query
  *         name: id
  *         schema:
  *           type: string
- *         description: Filtra produto pelo ID
+ *         description: Filtra pedido pelo ID
  *       - in: query
- *         name: name
+ *         name: product_name
  *         schema:
  *           type: string
- *         description: Filtra produto pelo nome
+ *         description: Filtra pedido pelo nome do produto
  *       - in: query
  *         name: date
  *         schema:
  *           type: string
  *           format: date-time
- *         description: Filtra produto pela data
+ *         description: Filtra pedido pela data
  *     responses:
  *       200:
- *         description: Lista de produtos filtrados
+ *         description: Lista de pedidos filtrados
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Product'
+ *                 $ref: '#/components/schemas/Order'
  */
 router.get('/search', (req, res) => {
-    productsDB = loadProducts();
-    const { id, name, date } = req.query;
+  ordersDB = loadOrders();
+  const { id, product_name, date } = req.query;
 
-    let filtered = productsDB;
+  let filtered = ordersDB;
 
-    if (id) filtered = filtered.filter(p => p.id === id);
-    if (name) filtered = filtered.filter(p => p.name.toLowerCase().includes(name.toLowerCase()));
-    if (date) filtered = filtered.filter(p => p.date === date);
+  if (id) filtered = filtered.filter(o => o.id === id);
+  if (product_name) filtered = filtered.filter(o => o.product_name && o.product_name.toLowerCase().includes(product_name.toLowerCase()));
+  if (date) filtered = filtered.filter(o => o.date === date);
 
-    res.json(filtered);
+  res.json(filtered);
 });
 
 /**
  * @swagger
- * /product/{id}:
+ * /orders/{id}:
  *   get:
- *     summary: Retorna um produto específico pelo ID
- *     tags: [Produtos]
+ *     summary: Retorna um pedido específico pelo ID
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do produto
+ *         description: ID do pedido
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Produto encontrado
+ *         description: Pedido encontrado
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/Order'
  *       404:
- *         description: Produto não encontrado
+ *         description: Pedido não encontrado
  */
 router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    productsDB = loadProducts();
-    const product = productsDB.find(p => p.id === id);
-    if (!product) return res.status(404).json({ erro: "Produto não encontrado!" });
-    res.json(product);
+  const id = req.params.id;
+  ordersDB = loadOrders();
+  const order = ordersDB.find(o => o.id === id);
+  if (!order) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+  res.json(order);
 });
 
 /**
  * @swagger
- * /product:
+ * /orders:
  *   post:
- *     summary: Cadastra um novo produto
- *     tags: [Produtos]
+ *     summary: Cadastra um novo pedido
+ *     tags: [Pedidos]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: string
- *               stock_quantity:
- *                 type: string
- *               supplier_id:
- *                 type: string
- *               status:
- *                 type: string
+ *             $ref: '#/components/schemas/Order'
  *     responses:
  *       201:
- *         description: Produto cadastrado com sucesso
+ *         description: Pedido criado com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/Order'
  */
 router.post('/', (req, res) => {
-    const newProduct = { id: uuidv4(), ...req.body };
-    productsDB = loadProducts();
-    productsDB.push(newProduct);
-    saveProducts();
-    res.status(201).json(newProduct);
+  const newOrder = { id: uuidv4(), ...req.body };
+  ordersDB = loadOrders();
+  ordersDB.push(newOrder);
+  saveOrders();
+  res.status(201).json(newOrder);
 });
 
 /**
  * @swagger
- * /product/{id}:
+ * /orders/{id}:
  *   put:
- *     summary: Atualiza um produto existente
- *     tags: [Produtos]
+ *     summary: Atualiza um pedido existente
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do produto
+ *         description: ID do pedido
  *         schema:
  *           type: string
  *     requestBody:
@@ -214,71 +208,61 @@ router.post('/', (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: string
- *               stock_quantity:
- *                 type: string
- *               supplier_id:
- *                 type: string
- *               status:
- *                 type: string
+ *             $ref: '#/components/schemas/Order'
  *     responses:
  *       200:
- *         description: Produto atualizado com sucesso
+ *         description: Pedido atualizado com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/Order'
  *       404:
- *         description: Produto não encontrado
+ *         description: Pedido não encontrado
  */
 router.put('/:id', (req, res) => {
-    const id = req.params.id;
-    productsDB = loadProducts();
-    const index = productsDB.findIndex(p => p.id === id);
-    if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
-    productsDB[index] = { id, ...req.body };
-    saveProducts();
-    res.json(productsDB[index]);
+  const id = req.params.id;
+  const newOrderData = req.body;
+  ordersDB = loadOrders();
+  const index = ordersDB.findIndex(o => o.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+
+  ordersDB[index] = { ...ordersDB[index], ...newOrderData };
+  saveOrders();
+  res.json(ordersDB[index]);
 });
 
 /**
  * @swagger
- * /product/{id}:
+ * /orders/{id}:
  *   delete:
- *     summary: Exclui um produto pelo ID
- *     tags: [Produtos]
+ *     summary: Exclui um pedido pelo ID
+ *     tags: [Pedidos]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID do produto
+ *         description: ID do pedido
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Produto excluído com sucesso
+ *         description: Pedido excluído com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/Order'
  *       404:
- *         description: Produto não encontrado
+ *         description: Pedido não encontrado
  */
 router.delete('/:id', (req, res) => {
-    const id = req.params.id;
-    productsDB = loadProducts();
-    const index = productsDB.findIndex(p => p.id === id);
-    if (index === -1) return res.status(404).json({ erro: "Produto não encontrado!" });
-    const deleted = productsDB.splice(index, 1);
-    saveProducts();
-    res.json(deleted[0]);
+  const id = req.params.id;
+  ordersDB = loadOrders();
+  const index = ordersDB.findIndex(o => o.id === id);
+  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+
+  const deleted = ordersDB.splice(index, 1);
+  saveOrders();
+  res.json(deleted[0]);
 });
 
 module.exports = router;
