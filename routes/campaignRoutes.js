@@ -67,7 +67,7 @@ function saveCampaigns() {
  * @swagger
  * /campaigns:
  *   get:
- *     summary: Lista campanhas com possibilidade de filtro por ID, nome e intervalo de datas
+ *     summary: Lista campanhas com filtro por ID, nome e datas
  *     tags: [Campanhas]
  *     parameters:
  *       - in: query
@@ -85,13 +85,13 @@ function saveCampaigns() {
  *         schema:
  *           type: string
  *           format: date-time
- *         description: Filtra campanhas que começam a partir desta data
+ *         description: Filtra campanhas com start_date igual à data informada
  *       - in: query
  *         name: end_date
  *         schema:
  *           type: string
  *           format: date-time
- *         description: Filtra campanhas que terminam até esta data
+ *         description: Filtra campanhas com end_date igual à data informada
  *     responses:
  *       200:
  *         description: Lista de campanhas filtradas
@@ -104,29 +104,14 @@ function saveCampaigns() {
  */
 router.get('/', (req, res) => {
   campaignsDB = loadCampaigns();
-
   const { id, name, start_date, end_date } = req.query;
 
   let filtered = campaignsDB;
 
-  if (id) {
-    filtered = filtered.filter(c => c.id === id);
-  }
-
-  if (name) {
-    const lowerName = name.toLowerCase();
-    filtered = filtered.filter(c => c.name.toLowerCase().includes(lowerName));
-  }
-
-  if (start_date) {
-    const startDateObj = new Date(start_date);
-    filtered = filtered.filter(c => new Date(c.start_date) >= startDateObj);
-  }
-
-  if (end_date) {
-    const endDateObj = new Date(end_date);
-    filtered = filtered.filter(c => new Date(c.end_date) <= endDateObj);
-  }
+  if (id) filtered = filtered.filter(c => c.id === id);
+  if (name) filtered = filtered.filter(c => c.name.toLowerCase().includes(name.toLowerCase()));
+  if (start_date) filtered = filtered.filter(c => c.start_date === start_date);
+  if (end_date) filtered = filtered.filter(c => c.end_date === end_date);
 
   res.json(filtered);
 });
@@ -262,5 +247,7 @@ router.delete('/:id', (req, res) => {
 
   const deleted = campaignsDB.splice(index, 1);
   saveCampaigns();
- 
+  res.json(deleted[0]);
 });
+
+module.exports = router;
