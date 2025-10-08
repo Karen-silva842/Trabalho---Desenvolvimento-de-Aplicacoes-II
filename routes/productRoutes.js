@@ -235,4 +235,43 @@ router.delete('/:id', (req, res) => {
     res.json(deleted[0]);
 });
 
+/**
+ * @swagger
+ * /product/search:
+ *   get:
+ *     summary: Busca produtos por ID e nome
+ *     tags: [Produtos]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: Filtra produto pelo ID
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filtra produto pelo nome
+ *     responses:
+ *       200:
+ *         description: Lista de produtos filtrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ */
+router.get('/search', (req, res) => {
+    productsDB = loadProducts();
+    const { id, name } = req.query;
+
+    let filtered = productsDB;
+
+    if (id) filtered = filtered.filter(p => p.id === id);
+    if (name) filtered = filtered.filter(p => p.name.toLowerCase().includes(name.toLowerCase()));
+
+    res.json(filtered);
+});
+
 module.exports = router;
