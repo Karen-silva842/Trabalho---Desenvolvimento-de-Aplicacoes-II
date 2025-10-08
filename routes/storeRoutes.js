@@ -15,7 +15,7 @@ function loadStores() {
 
 function saveStores() {
   try {
-    fs.writeFileSync('.data/store.json', JSON.stringify(storesDB, null, 2))
+    fs.writeFileSync('./data/store.json', JSON.stringify(storesDB, null, 2))
     return 'Salvo'
   } catch (err) {
     console.error('Erro ao salvar lojas:', err)
@@ -77,6 +77,45 @@ function saveStores() {
 router.get('/', (req, res) => {
   storesDB = loadStores()
   res.json(storesDB)
+})
+
+/**
+ * @swagger
+ * /store/search:
+ *   get:
+ *     summary: Busca lojas por ID ou nome
+ *     tags: [Lojas]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: Filtra por ID da loja
+ *       - in: query
+ *         name: store_name
+ *         schema:
+ *           type: string
+ *         description: Filtra por nome da loja
+ *     responses:
+ *       200:
+ *         description: Lista de lojas filtradas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Store'
+ */
+router.get('/search', (req, res) => {
+  storesDB = loadStores();
+  const { id, store_name } = req.query;
+
+  let filtered = storesDB;
+
+  if (id) filtered = filtered.filter(s => s.id === id);
+  if (store_name) filtered = filtered.filter(s => s.store_name.toLowerCase().includes(store_name.toLowerCase()));
+
+  res.json(filtered);
 })
 
 /**
