@@ -5,6 +5,7 @@ const fs = require('fs')
 
 let usersDB = loadUsers()
 
+//Para ler ao arquivo
 function loadUsers() {
   try {
     return JSON.parse(fs.readFileSync('./data/users.json', 'utf8'))
@@ -13,6 +14,7 @@ function loadUsers() {
   }
 }
 
+//Para gravar o arquivo
 function saveUsers() {
   try {
     fs.writeFileSync('./data/users.json', JSON.stringify(usersDB, null, 2))
@@ -128,6 +130,8 @@ router.get('/', (req, res) => {
  *       404:
  *         description: Nenhum usuário encontrado
  */
+
+//Busca todos usuarios
 router.get('/all', (req, res) => {
   usersDB = loadUsers()
   if (usersDB.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' })
@@ -157,6 +161,8 @@ router.get('/all', (req, res) => {
  *       404:
  *         description: Usuário não encontrado
  */
+
+//Busca por id ou nome
 router.get('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
@@ -183,6 +189,8 @@ router.get('/:id', (req, res) => {
  *       400:
  *         description: Campos obrigatórios não preenchidos
  */
+
+//Cria um novo usuario
 router.post('/', (req, res) => {
   const { name, contact_email, user, pwd, level, status } = req.body
   if (!name || !contact_email || !user || !pwd || !level || !status)
@@ -224,6 +232,8 @@ router.post('/', (req, res) => {
  *       404:
  *         description: Usuário não encontrado
  */
+
+//Atualiza usuario
 router.put('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
@@ -263,6 +273,8 @@ router.put('/:id', (req, res) => {
  *       404:
  *         description: Usuário não encontrado
  */
+
+//deleta usuario
 router.delete('/:id', (req, res) => {
   const id = req.params.id
   usersDB = loadUsers()
