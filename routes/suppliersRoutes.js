@@ -46,9 +46,6 @@ function saveSuppliers() {
  *           type: string
  *         status:
  *           type: string
- *         data:
- *           type: string
- *           format: date
  */
 
 /**
@@ -107,7 +104,7 @@ router.get('/:id', (req, res) => {
  * @swagger
  * /supplier/search:
  *   get:
- *     summary: Busca fornecedores por id, nome ou data
+ *     summary: Busca fornecedores por id ou nome
  *     tags: [Fornecedores]
  *     parameters:
  *       - in: query
@@ -120,12 +117,6 @@ router.get('/:id', (req, res) => {
  *         schema:
  *           type: string
  *         description: Nome do fornecedor
- *       - in: query
- *         name: data
- *         schema:
- *           type: string
- *           format: date
- *         description: Data de cadastro do fornecedor
  *     responses:
  *       200:
  *         description: Lista de fornecedores filtrados
@@ -137,7 +128,7 @@ router.get('/:id', (req, res) => {
  *                 $ref: '#/components/schemas/Supplier'
  */
 router.get('/search', (req, res) => {
-  const { id, supplier_name, data } = req.query
+  const { id, supplier_name } = req.query
   suppliersDB = loadSuppliers()
 
   let results = suppliersDB
@@ -147,9 +138,6 @@ router.get('/search', (req, res) => {
   }
   if (supplier_name) {
     results = results.filter(s => s.supplier_name.toLowerCase().includes(supplier_name.toLowerCase()))
-  }
-  if (data) {
-    results = results.filter(s => s.data === data)
   }
 
   res.json(results)
@@ -183,21 +171,25 @@ router.get('/search', (req, res) => {
  *                 type: string
  *               status:
  *                 type: string
- *               data:
- *                 type: string
- *                 format: date
  *     responses:
  *       201:
  *         description: Fornecedor cadastrado com sucesso
  */
 router.post('/', (req, res) => {
-  const { supplier_name, supplier_category, contact_email, phone_number, status, data } = req.body
+  const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body
   if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
     return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios!' })
   }
 
   suppliersDB = loadSuppliers()
-  const newSupplier = { id: uuidv4(), supplier_name, supplier_category, contact_email, phone_number, status: status || 'on', data: data || new Date().toISOString().split('T')[0] }
+  const newSupplier = { 
+    id: uuidv4(), 
+    supplier_name, 
+    supplier_category, 
+    contact_email, 
+    phone_number, 
+    status: status || 'on' 
+  }
   suppliersDB.push(newSupplier)
   saveSuppliers()
   res.status(201).json(newSupplier)
@@ -232,9 +224,6 @@ router.post('/', (req, res) => {
  *                 type: string
  *               status:
  *                 type: string
- *               data:
- *                 type: string
- *                 format: date
  *     responses:
  *       200:
  *         description: Fornecedor atualizado com sucesso
