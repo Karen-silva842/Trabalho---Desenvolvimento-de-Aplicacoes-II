@@ -46,6 +46,9 @@ function saveSuppliers() {
  *           type: string
  *         status:
  *           type: string
+ *         data:
+ *           type: string
+ *           format: date
  */
 
 /**
@@ -66,18 +69,7 @@ function saveSuppliers() {
  */
 router.get('/', (req, res) => {
   suppliersDB = loadSuppliers()
-  const { supplier_name, created_at } = req.query
-  let result = suppliersDB
-
-  if (supplier_name) {
-    result = result.filter(s => s.supplier_name.toLowerCase().includes(supplier_name.toLowerCase()))
-  }
-
-  if (created_at) {
-    result = result.filter(s => s.created_at && s.created_at.startsWith(created_at))
-  }
-
-  res.json(result)
+  res.json(suppliersDB)
 })
 
 /**
@@ -113,6 +105,58 @@ router.get('/:id', (req, res) => {
 
 /**
  * @swagger
+ * /supplier/search:
+ *   get:
+ *     summary: Busca fornecedores por id, nome ou data
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *       - in: query
+ *         name: supplier_name
+ *         schema:
+ *           type: string
+ *         description: Nome do fornecedor
+ *       - in: query
+ *         name: data
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data de cadastro do fornecedor
+ *     responses:
+ *       200:
+ *         description: Lista de fornecedores filtrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Supplier'
+ */
+router.get('/search', (req, res) => {
+  const { id, supplier_name, data } = req.query
+  suppliersDB = loadSuppliers()
+
+  let results = suppliersDB
+
+  if (id) {
+    results = results.filter(s => s.id === id)
+  }
+  if (supplier_name) {
+    results = results.filter(s => s.supplier_name.toLowerCase().includes(supplier_name.toLowerCase()))
+  }
+  if (data) {
+    results = results.filter(s => s.data === data)
+  }
+
+  res.json(results)
+})
+
+/**
+ * @swagger
  * /supplier:
  *   post:
  *     summary: Cadastra um novo fornecedor
@@ -139,26 +183,21 @@ router.get('/:id', (req, res) => {
  *                 type: string
  *               status:
  *                 type: string
+ *               data:
+ *                 type: string
+ *                 format: date
  *     responses:
  *       201:
  *         description: Fornecedor cadastrado com sucesso
  */
 router.post('/', (req, res) => {
-  const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body
+  const { supplier_name, supplier_category, contact_email, phone_number, status, data } = req.body
   if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
     return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios!' })
   }
 
   suppliersDB = loadSuppliers()
-  const newSupplier = { 
-    id: uuidv4(), 
-    supplier_name, 
-    supplier_category, 
-    contact_email, 
-    phone_number, 
-    status: status || 'on',
-    created_at: new Date().toISOString()
-  }
+  const newSupplier = { id: uuidv4(), supplier_name, supplier_category, contact_email, phone_number, status: status || 'on', data: data || new Date().toISOString().split('T')[0] }
   suppliersDB.push(newSupplier)
   saveSuppliers()
   res.status(201).json(newSupplier)
@@ -193,6 +232,9 @@ router.post('/', (req, res) => {
  *                 type: string
  *               status:
  *                 type: string
+ *               data:
+ *                 type: string
+ *                 format: date
  *     responses:
  *       200:
  *         description: Fornecedor atualizado com sucesso
