@@ -53,8 +53,6 @@ function saveOrders() {
  *         date:
  *           type: string
  *           format: date-time
- *         name:
- *           type: string
  *       required:
  *         - id
  *         - store_id
@@ -64,7 +62,6 @@ function saveOrders() {
  *         - total_amount
  *         - status
  *         - date
- *         - name
  */
 
 /**
@@ -86,54 +83,6 @@ function saveOrders() {
 router.get('/', (req, res) => {
   ordersDB = loadOrders();
   res.json(ordersDB);
-});
-
-/**
- * @swagger
- * /orders/search:
- *   get:
- *     summary: Busca pedidos por ID, nome ou data
- *     tags: [Pedidos]
- *     parameters:
- *       - in: query
- *         name: id
- *         schema:
- *           type: string
- *         description: ID do pedido
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         description: Nome do pedido
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *           format: date-time
- *         description: Data do pedido (YYYY-MM-DD)
- *     responses:
- *       200:
- *         description: Pedidos encontrados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Order'
- *       404:
- *         description: Nenhum pedido encontrado
- */
-router.get('/search', (req, res) => {
-  const { id, name, date } = req.query;
-  ordersDB = loadOrders();
-  let results = ordersDB;
-
-  if (id) results = results.filter(o => o.id === id);
-  if (name) results = results.filter(o => o.name.toLowerCase().includes(name.toLowerCase()));
-  if (date) results = results.filter(o => o.date.startsWith(date));
-
-  if (results.length === 0) return res.status(404).json({ erro: 'Nenhum pedido encontrado!' });
-  res.json(results);
 });
 
 /**
@@ -167,6 +116,26 @@ router.get('/:id', (req, res) => {
   res.json(order);
 });
 
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Cadastra um novo pedido
+ *     tags: [Pedidos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       201:
+ *         description: Pedido criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ */
 router.post('/', (req, res) => {
   const newOrder = { id: uuidv4(), ...req.body };
   ordersDB = loadOrders();
@@ -175,6 +144,35 @@ router.post('/', (req, res) => {
   res.status(201).json(newOrder);
 });
 
+/**
+ * @swagger
+ * /orders/{id}:
+ *   put:
+ *     summary: Atualiza um pedido existente
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do pedido
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       200:
+ *         description: Pedido atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.put('/:id', (req, res) => {
   const id = req.params.id;
   const newOrderData = req.body;
@@ -187,6 +185,29 @@ router.put('/:id', (req, res) => {
   res.json(ordersDB[index]);
 });
 
+/**
+ * @swagger
+ * /orders/{id}:
+ *   delete:
+ *     summary: Exclui um pedido pelo ID
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do pedido
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pedido excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.delete('/:id', (req, res) => {
   const id = req.params.id;
   ordersDB = loadOrders();
