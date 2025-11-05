@@ -33,3 +33,40 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
+// index.js
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./routes/swagger');
+const connectDB = require('./config/db');
+
+// conecta no MongoDB
+connectDB();
+
+const usersRoutes = require('./routes/usersRoutes');
+const suppliersRoutes = require('./routes/suppliersRoutes');
+const storeRoutes = require('./routes/storeRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const campaignRoutes = require('./routes/campaignRoutes');
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/users', usersRoutes);
+app.use('/supplier', suppliersRoutes);
+app.use('/store', storeRoutes);
+app.use('/product', productRoutes);
+app.use('/orders', orderRoutes);
+app.use('/campaigns', campaignRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.get('/', (req, res) => {
+  res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a>');
+});
+
+app.listen(port, () => {
+  console.log(`Servidor rodando em http://localhost:${port}`);
+});
