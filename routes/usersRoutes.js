@@ -1,30 +1,19 @@
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
+const express = require('express')
+const router = express.Router()
+const { v4: uuidv4 } = require('uuid')
+const fs = require('fs')
 
+let usersDB = loadUsers()
 
-router.get('/', async (req, res) => {
+function loadUsers() {
   try {
-    const { id, name } = req.query;
-    if (id) {
-      const user = await User.findById(id);
-      if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' });
-      return res.json(user);
-    }
-    if (name) {
-      const users = await User.find({ name: new RegExp(name, 'i') });
-      if (users.length === 0) return res.status(404).json({ erro: 'Usuário não encontrado!' });
-      return res.json(users.length === 1 ? users[0] : users);
-    }
-    const users = await User.find();
-    if (users.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' });
-    res.json(users);
+    return JSON.parse(fs.readFileSync('./data/users.json', 'utf8'))
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao buscar usuários', detalhes: err.message });
   }
-});
+}
 
-router.get('/all', async (req, res) => {
+function saveUsers() {
   try {
     const users = await User.find();
     if (users.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' });
@@ -40,46 +29,260 @@ router.get('/:id', async (req, res) => {
     if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' });
     res.json(user);
   } catch (err) {
-    res.status(400).json({ erro: 'ID inválido' });
+    console.error('Erro ao salvar usuários:', err)
+    return 'Não salvo'
   }
-});
+}
 
-router.post('/', async (req, res) => {
-  try {
-    const { name, contact_email, user, pwd, level, status } = req.body;
-    if (!name || !contact_email || !user || !pwd || !level || !status)
-      return res.status(400).json({ erro: 'Preencha todos os campos!' });
+/**
+ * @swagger
+ * tags:
+ *   - name: Usuários
+ *     description: "Rotas de gerenciamento de usuários - Karen Suélen da Silva"
+ *
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: "ID único do usuário"
+ *         name:
+ *           type: string
+ *           description: "Nome completo do usuário"
+ *         contact_email:
+ *           type: string
+ *           description: "E-mail de contato do usuário"
+ *         user:
+ *           type: string
+ *           description: "Login do usuário"
+ *         pwd:
+ *           type: string
+ *           description: "Senha do usuário"
+ *         level:
+ *           type: string
+ *           description: "Nível de acesso (presidente, admin, vendedor)"
+ *         status:
+ *           type: string
+ *           description: "Status do usuário (on/off)"
+ *       required:
+ *         - id
+ *         - name
+ *         - contact_email
+ *         - user
+ *         - pwd
+ *         - level
+ *         - status
+ */
 
-    const newUser = new User({ name, contact_email, user, pwd, level, status });
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (err) {
-    res.status(400).json({ erro: 'Erro ao criar usuário', detalhes: err.message });
-  }
-});
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Retorna todos os usuários ou busca por id ou name
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: "ID do usuário"
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: "Nome do usuário"
+ *     responses:
+ *       200:
+ *         description: Usuário(s) encontrado(s)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/User'
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.get('/', (req, res) => {
+  usersDB = loadUsers()
+  const { id, name } = req.query
 
-router.put('/:id', async (req, res) => {
-  try {
-    const { name, contact_email, user, pwd, level, status } = req.body;
-    if (!name || !contact_email || !user || !pwd || !level || !status)
-      return res.status(400).json({ erro: 'Campos obrigatórios faltando!' });
+  let results = usersDB
 
-    const updated = await User.findByIdAndUpdate(req.params.id, { name, contact_email, user, pwd, level, status }, { new: true });
-    if (!updated) return res.status(404).json({ erro: 'Usuário não encontrado!' });
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ erro: 'Erro ao atualizar usuário', detalhes: err.message });
-  }
-});
+  if (id) results = results.filter(u => u.id === id)
+  if (name) results = results.filter(u => u.name.toLowerCase().includes(name.toLowerCase()))
 
-router.delete('/:id', async (req, res) => {
-  try {
-    const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ erro: 'Usuário não encontrado!' });
-    res.json(deleted);
-  } catch (err) {
-    res.status(400).json({ erro: 'Erro ao excluir usuário' });
-  }
-});
+  if (results.length === 0) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+
+  res.json(results.length === 1 ? results[0] : results)
+})
+
+/**
+ * @swagger
+ * /users/all:
+ *   get:
+ *     summary: Retorna todos os usuários cadastrados
+ *     tags: [Usuários]
+ *     responses:
+ *       200:
+ *         description: Lista de todos os usuários
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Nenhum usuário encontrado
+ */
+router.get('/all', (req, res) => {
+  usersDB = loadUsers()
+  if (usersDB.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' })
+  res.json(usersDB)
+})
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Retorna um usuário específico pelo ID
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário"
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.get('/:id', (req, res) => {
+  const id = req.params.id
+  usersDB = loadUsers()
+  const user = usersDB.find(u => u.id === id)
+  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+  res.json(user)
+})
+
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Cadastra um novo usuário
+ *     tags: [Usuários]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso
+ *       400:
+ *         description: Campos obrigatórios não preenchidos
+ */
+router.post('/', (req, res) => {
+  const { name, contact_email, user, pwd, level, status } = req.body
+  if (!name || !contact_email || !user || !pwd || !level || !status)
+    return res.status(400).json({ erro: 'Preencha todos os campos!' })
+
+  usersDB = loadUsers()
+  const newUser = { id: uuidv4(), name, contact_email, user, pwd, level, status }
+  usersDB.push(newUser)
+  saveUsers()
+  res.status(201).json(newUser)
+})
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Atualiza um usuário existente
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário a ser atualizado"
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put('/:id', (req, res) => {
+  const id = req.params.id
+  usersDB = loadUsers()
+  const index = usersDB.findIndex(u => u.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+
+  const { name, contact_email, user, pwd, level, status } = req.body
+  if (!name || !contact_email || !user || !pwd || !level || !status)
+    return res.status(400).json({ erro: 'Campos obrigatórios faltando!' })
+
+  const updatedUser = { id, name, contact_email, user, pwd, level, status }
+  usersDB[index] = updatedUser
+  saveUsers()
+  res.json(updatedUser)
+})
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Remove um usuário existente
+ *     tags: [Usuários]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID do usuário a ser removido"
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Usuário removido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.delete('/:id', (req, res) => {
+  const id = req.params.id
+  usersDB = loadUsers()
+  const index = usersDB.findIndex(u => u.id === id)
+  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+
+  const deleted = usersDB.splice(index, 1)
+  saveUsers()
+  res.json(deleted[0])
+})
 
 module.exports = router;
