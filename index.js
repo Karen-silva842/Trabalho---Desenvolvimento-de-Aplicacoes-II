@@ -1,8 +1,11 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./routes/swagger');
+const connectDB = require('./config/db');
+
+connectDB();
 
 const usersRoutes = require('./routes/usersRoutes');
 const suppliersRoutes = require('./routes/suppliersRoutes');
@@ -24,10 +27,9 @@ app.use('/campaigns', campaignRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
-  res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a> para a documentação.');
+  res.send('API Central de Compras Ativa! Acesse <a href="/api-docs">/api-docs</a>');
 });
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
-  console.log(`Documentação Swagger disponível em http://localhost:${port}/api-docs`);
 });

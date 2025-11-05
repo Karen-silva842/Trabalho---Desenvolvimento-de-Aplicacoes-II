@@ -1,262 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
+const Order = require('../models/Order');
 
-let ordersDB = loadOrders();
-
-function loadOrders() {
+router.get('/', async (req, res) => {
   try {
-    return JSON.parse(fs.readFileSync('./data/order.json', 'utf8'));
+    const { id, date } = req.query;
+    if (id) {
+      const order = await Order.findById(id);
+      if (!order) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+      return res.json(order);
+    }
+    if (date) {
+      const orders = await Order.find({ date });
+      return res.json(orders);
+    }
+    const orders = await Order.find();
+    res.json(orders);
   } catch (err) {
-    return [];
+    res.status(500).json({ erro: 'Erro ao buscar pedidos', detalhes: err.message });
   }
-}
+});
 
-function saveOrders() {
+router.get('/search', async (req, res) => {
   try {
-    fs.writeFileSync('./data/order.json', JSON.stringify(ordersDB, null, 2));
-    return 'Salvo';
+    const { id, date } = req.query;
+    let query = {};
+    if (id) query._id = id;
+    if (date) query.date = date;
+    const results = await Order.find(query);
+    res.json(results);
   } catch (err) {
-    console.error('Erro ao salvar pedidos:', err);
-    return 'Não salvo';
+    res.status(500).json({ erro: 'Erro na busca', detalhes: err.message });
   }
-}
-
-/**
- * @swagger
- * tags:
- *   - name: Pedidos
- *     description: Rotas de gerenciamento de pedidos - Davi Mendes
- *
- * components:
- *   schemas:
- *     Order:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         store_id:
- *           type: string
- *         product_id:
- *           type: string
- *         quantity:
- *           type: number
- *         campaign_id:
- *           type: string
- *         unit_price:
- *           type: string
- *         total_amount:
- *           type: string
- *         status:
- *           type: string
- *         date:
- *           type: string
- *           format: date-time
- *       required:
- *         - id
- *         - store_id
- *         - product_id
- *         - quantity
- *         - unit_price
- *         - total_amount
- *         - status
- *         - date
- */
-
-/**
- * @swagger
- * /orders:
- *   get:
- *     summary: Lista todos os pedidos
- *     tags: [Pedidos]
- *     responses:
- *       200:
- *         description: Lista de pedidos retornada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Order'
- */
-router.get('/', (req, res) => {
-  ordersDB = loadOrders();
-  res.json(ordersDB);
 });
 
-/**
- * @swagger
- * /orders/search:
- *   get:
- *     summary: Busca pedidos por ID e data
- *     tags: [Pedidos]
- *     parameters:
- *       - in: query
- *         name: id
- *         schema:
- *           type: string
- *         description: Filtra pedido pelo ID
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *           format: date-time
- *         description: Filtra pedido pela data
- *     responses:
- *       200:
- *         description: Lista de pedidos filtrados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Order'
- */
-router.get('/search', (req, res) => {
-  ordersDB = loadOrders();
-  const { id, date } = req.query;
-
-  let filtered = ordersDB;
-
-  if (id) filtered = filtered.filter(o => o.id === id);
-  if (date) filtered = filtered.filter(o => o.date === date);
-
-  res.json(filtered);
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+    res.json(order);
+  } catch (err) {
+    res.status(400).json({ erro: 'ID inválido' });
+  }
 });
 
-/**
- * @swagger
- * /orders/{id}:
- *   get:
- *     summary: Retorna um pedido específico pelo ID
- *     tags: [Pedidos]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID do pedido
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Pedido encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Order'
- *       404:
- *         description: Pedido não encontrado
- */
-router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  ordersDB = loadOrders();
-  const order = ordersDB.find(o => o.id === id);
-  if (!order) return res.status(404).json({ erro: 'Pedido não encontrado!' });
-  res.json(order);
+router.post('/', async (req, res) => {
+  try {
+    const newOrder = new Order(req.body);
+    await newOrder.save();
+    res.status(201).json(newOrder);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao criar pedido', detalhes: err.message });
+  }
 });
 
-/**
- * @swagger
- * /orders:
- *   post:
- *     summary: Cadastra um novo pedido
- *     tags: [Pedidos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Order'
- *     responses:
- *       201:
- *         description: Pedido criado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Order'
- */
-router.post('/', (req, res) => {
-  const newOrder = { id: uuidv4(), ...req.body };
-  ordersDB = loadOrders();
-  ordersDB.push(newOrder);
-  saveOrders();
-  res.status(201).json(newOrder);
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao atualizar pedido', detalhes: err.message });
+  }
 });
 
-/**
- * @swagger
- * /orders/{id}:
- *   put:
- *     summary: Atualiza um pedido existente
- *     tags: [Pedidos]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID do pedido
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Order'
- *     responses:
- *       200:
- *         description: Pedido atualizado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Order'
- *       404:
- *         description: Pedido não encontrado
- */
-router.put('/:id', (req, res) => {
-  const id = req.params.id;
-  const newOrderData = req.body;
-  ordersDB = loadOrders();
-  const index = ordersDB.findIndex(o => o.id === id);
-  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
-
-  ordersDB[index] = { ...ordersDB[index], ...newOrderData };
-  saveOrders();
-  res.json(ordersDB[index]);
-});
-
-/**
- * @swagger
- * /orders/{id}:
- *   delete:
- *     summary: Exclui um pedido pelo ID
- *     tags: [Pedidos]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID do pedido
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Pedido excluído com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Order'
- *       404:
- *         description: Pedido não encontrado
- */
-router.delete('/:id', (req, res) => {
-  const id = req.params.id;
-  ordersDB = loadOrders();
-  const index = ordersDB.findIndex(o => o.id === id);
-  if (index === -1) return res.status(404).json({ erro: 'Pedido não encontrado!' });
-
-  const deleted = ordersDB.splice(index, 1);
-  saveOrders();
-  res.json(deleted[0]);
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Order.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ erro: 'Pedido não encontrado!' });
+    res.json(deleted);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao excluir pedido' });
+  }
 });
 
 module.exports = router;

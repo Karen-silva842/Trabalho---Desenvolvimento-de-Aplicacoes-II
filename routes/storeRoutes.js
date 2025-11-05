@@ -1,284 +1,68 @@
-const express = require('express')
-const router = express.Router()
-const { v4: uuidv4 } = require('uuid')
-const fs = require('fs')
+const express = require('express');
+const router = express.Router();
+const Store = require('../models/Store');
 
-let storesDB = loadStores()
-
-function loadStores() {
+router.get('/', async (req, res) => {
   try {
-    return JSON.parse(fs.readFileSync('./data/store.json', 'utf8'))
+    const { id, store_name } = req.query;
+    if (id) {
+      const s = await Store.findById(id);
+      if (!s) return res.status(404).json({ erro: 'Loja não encontrada!' });
+      return res.json(s);
+    }
+    if (store_name) {
+      const results = await Store.find({ store_name: new RegExp(store_name, 'i') });
+      return res.json(results);
+    }
+    const stores = await Store.find();
+    res.json(stores);
   } catch (err) {
-    return []
+    res.status(500).json({ erro: 'Erro ao buscar lojas', detalhes: err.message });
   }
-}
+});
 
-function saveStores() {
+router.get('/:id', async (req, res) => {
   try {
-    fs.writeFileSync('./data/store.json', JSON.stringify(storesDB, null, 2))
-    return 'Salvo'
+    const store = await Store.findById(req.params.id);
+    if (!store) return res.status(404).json({ erro: 'Loja não encontrada!' });
+    res.json(store);
   } catch (err) {
-    console.error('Erro ao salvar lojas:', err)
-    return 'Não salvo'
+    res.status(400).json({ erro: 'ID inválido' });
   }
-}
+});
 
-/**
- * @swagger
- * tags:
- *   - name: Lojas
- *     description: Rotas de gerenciamento de lojas - Bryan Gonçalves Pereira
- *
- * components:
- *   schemas:
- *     Store:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         store_name:
- *           type: string
- *         cnpj:
- *           type: string
- *         address:
- *           type: string
- *         phone_number:
- *           type: string
- *         contact_email:
- *           type: string
- *         status:
- *           type: string
- *       required:
- *         - id
- *         - store_name
- *         - cnpj
- *         - address
- *         - phone_number
- *         - contact_email
- *         - status
- */
+router.post('/', async (req, res) => {
+  try {
+    const { store_name, cnpj, address, phone_number, contact_email, status } = req.body;
+    if (!store_name || !cnpj || !address || !phone_number || !contact_email || !status)
+      return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
 
-/**
- * @swagger
- * /store:
- *   get:
- *     summary: Retorna todas as lojas cadastradas
- *     tags: [Lojas]
- *     responses:
- *       200:
- *         description: Lista de todas as lojas
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Store'
- */
-router.get('/', (req, res) => {
-  storesDB = loadStores()
-  res.json(storesDB)
-})
-
-/**
- * @swagger
- * /store/search:
- *   get:
- *     summary: Busca lojas por ID ou nome
- *     tags: [Lojas]
- *     parameters:
- *       - in: query
- *         name: id
- *         schema:
- *           type: string
- *         description: Filtra por ID da loja
- *       - in: query
- *         name: store_name
- *         schema:
- *           type: string
- *         description: Filtra por nome da loja
- *     responses:
- *       200:
- *         description: Lista de lojas filtradas
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Store'
- */
-router.get('/search', (req, res) => {
-  storesDB = loadStores();
-  const { id, store_name } = req.query;
-
-  let filtered = storesDB;
-
-  if (id) filtered = filtered.filter(s => s.id === id);
-  if (store_name) filtered = filtered.filter(s => s.store_name.toLowerCase().includes(store_name.toLowerCase()));
-
-  res.json(filtered);
-})
-
-/**
- * @swagger
- * /store/{id}:
- *   get:
- *     summary: Retorna uma loja específica pelo ID
- *     tags: [Lojas]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID da loja
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Loja encontrada
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Store'
- *       404:
- *         description: Loja não encontrada
- */
-router.get('/:id', (req, res) => {
-  const id = req.params.id
-  storesDB = loadStores()
-  const store = storesDB.find(s => s.id === id)
-  if (!store) return res.status(404).json({ erro: 'Loja não encontrada!' })
-  res.json(store)
-})
-
-/**
- * @swagger
- * /store:
- *   post:
- *     summary: Cria uma nova loja
- *     tags: [Lojas]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               store_name:
- *                 type: string
- *               cnpj:
- *                 type: string
- *               address:
- *                 type: string
- *               phone_number:
- *                 type: string
- *               contact_email:
- *                 type: string
- *               status:
- *                 type: string
- *     responses:
- *       201:
- *         description: Loja criada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Store'
- */
-router.post('/', (req, res) => {
-  const { store_name, cnpj, address, phone_number, contact_email, status } = req.body
-  if (!store_name || !cnpj || !address || !phone_number || !contact_email || !status) {
-    return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' })
+    const novo = new Store({ store_name, cnpj, address, phone_number, contact_email, status });
+    await novo.save();
+    res.status(201).json(novo);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao criar loja', detalhes: err.message });
   }
+});
 
-  const newStore = { id: uuidv4(), store_name, cnpj, address, phone_number, contact_email, status }
-  storesDB = loadStores()
-  storesDB.push(newStore)
-  saveStores()
-  res.status(201).json(newStore)
-})
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Store.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ erro: 'Loja não encontrada!' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao atualizar loja', detalhes: err.message });
+  }
+});
 
-/**
- * @swagger
- * /store/{id}:
- *   put:
- *     summary: Atualiza uma loja existente
- *     tags: [Lojas]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID da loja
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               store_name:
- *                 type: string
- *               cnpj:
- *                 type: string
- *               address:
- *                 type: string
- *               phone_number:
- *                 type: string
- *               contact_email:
- *                 type: string
- *               status:
- *                 type: string
- *     responses:
- *       200:
- *         description: Loja atualizada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Store'
- *       404:
- *         description: Loja não encontrada
- */
-router.put('/:id', (req, res) => {
-  const id = req.params.id
-  const { store_name, cnpj, address, phone_number, contact_email, status } = req.body
-  storesDB = loadStores()
-  const index = storesDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Loja não encontrada!' })
-  storesDB[index] = { id, store_name, cnpj, address, phone_number, contact_email, status }
-  saveStores()
-  res.json(storesDB[index])
-})
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Store.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ erro: 'Loja não encontrada!' });
+    res.json(deleted);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao excluir loja' });
+  }
+});
 
-/**
- * @swagger
- * /store/{id}:
- *   delete:
- *     summary: Remove uma loja pelo ID
- *     tags: [Lojas]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID da loja
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Loja removida com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Store'
- *       404:
- *         description: Loja não encontrada
- */
-router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  storesDB = loadStores()
-  const index = storesDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Loja não encontrada!' })
-  const deleted = storesDB.splice(index, 1)
-  saveStores()
-  res.json(deleted[0])
-})
-
-module.exports = router
+module.exports = router;

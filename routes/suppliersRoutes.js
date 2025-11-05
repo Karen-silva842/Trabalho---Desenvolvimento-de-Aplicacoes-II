@@ -1,273 +1,68 @@
-const express = require('express')
-const router = express.Router()
-const { v4: uuidv4 } = require('uuid')
-const fs = require('fs')
+const express = require('express');
+const router = express.Router();
+const Supplier = require('../models/Supplier');
 
-let suppliersDB = loadSuppliers()
-
-function loadSuppliers() {
+router.get('/', async (req, res) => {
   try {
-    return JSON.parse(fs.readFileSync('./data/suppliers.json', 'utf8'))
+    const { id, supplier_name } = req.query;
+    if (id) {
+      const s = await Supplier.findById(id);
+      if (!s) return res.status(404).json({ erro: 'Fornecedor não encontrado!' });
+      return res.json(s);
+    }
+    if (supplier_name) {
+      const results = await Supplier.find({ supplier_name: new RegExp(supplier_name, 'i') });
+      return res.json(results);
+    }
+    const suppliers = await Supplier.find();
+    res.json(suppliers);
   } catch (err) {
-    return []
+    res.status(500).json({ erro: 'Erro ao buscar fornecedores', detalhes: err.message });
   }
-}
+});
 
-function saveSuppliers() {
+router.get('/:id', async (req, res) => {
   try {
-    fs.writeFileSync('./data/suppliers.json', JSON.stringify(suppliersDB, null, 2))
-    return 'Salvo'
+    const supplier = await Supplier.findById(req.params.id);
+    if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' });
+    res.json(supplier);
   } catch (err) {
-    console.error('Erro ao salvar fornecedores:', err)
-    return 'Não salvo'
+    res.status(400).json({ erro: 'ID inválido' });
   }
-}
+});
 
-/**
- * @swagger
- * tags:
- *   - name: Fornecedores
- *     description: Rotas de gerenciamento de fornecedores - Karen Suélen da Silva
- *
- * components:
- *   schemas:
- *     Supplier:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         supplier_name:
- *           type: string
- *         supplier_category:
- *           type: string
- *         contact_email:
- *           type: string
- *         phone_number:
- *           type: string
- *         status:
- *           type: string
- */
+router.post('/', async (req, res) => {
+  try {
+    const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body;
+    if (!supplier_name || !supplier_category || !contact_email || !phone_number)
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios!' });
 
-/**
- * @swagger
- * /supplier:
- *   get:
- *     summary: Retorna todos os fornecedores cadastrados
- *     tags: [Fornecedores]
- *     responses:
- *       200:
- *         description: Lista de fornecedores cadastrados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Supplier'
- */
-router.get('/', (req, res) => {
-  suppliersDB = loadSuppliers()
-  res.json(suppliersDB)
-})
-
-/**
- * @swagger
- * /supplier/search:
- *   get:
- *     summary: Busca fornecedores por id ou nome
- *     tags: [Fornecedores]
- *     parameters:
- *       - in: query
- *         name: id
- *         schema:
- *           type: string
- *         description: ID do fornecedor
- *       - in: query
- *         name: supplier_name
- *         schema:
- *           type: string
- *         description: Nome do fornecedor
- *     responses:
- *       200:
- *         description: Lista de fornecedores filtrados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Supplier'
- */
-router.get('/search', (req, res) => {
-  const { id, supplier_name } = req.query
-  suppliersDB = loadSuppliers()
-
-  let results = suppliersDB
-
-  if (id) {
-    results = results.filter(s => s.id === id)
+    const novo = new Supplier({ supplier_name, supplier_category, contact_email, phone_number, status: status || 'on' });
+    await novo.save();
+    res.status(201).json(novo);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao criar fornecedor', detalhes: err.message });
   }
-  if (supplier_name) {
-    results = results.filter(s => s.supplier_name.toLowerCase().includes(supplier_name.toLowerCase()))
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ erro: 'Fornecedor não encontrado!' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao atualizar fornecedor', detalhes: err.message });
   }
+});
 
-  res.json(results)
-})
-
-/**
- * @swagger
- * /supplier/{id}:
- *   get:
- *     summary: Retorna um fornecedor específico pelo ID
- *     tags: [Fornecedores]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID do fornecedor
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Fornecedor encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Supplier'
- *       404:
- *         description: Fornecedor não encontrado
- */
-router.get('/:id', (req, res) => {
-  const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const supplier = suppliersDB.find(s => s.id === id)
-  if (!supplier) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
-  res.json(supplier)
-})
-
-/**
- * @swagger
- * /supplier:
- *   post:
- *     summary: Cadastra um novo fornecedor
- *     tags: [Fornecedores]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - supplier_name
- *               - supplier_category
- *               - contact_email
- *               - phone_number
- *             properties:
- *               supplier_name:
- *                 type: string
- *               supplier_category:
- *                 type: string
- *               contact_email:
- *                 type: string
- *               phone_number:
- *                 type: string
- *               status:
- *                 type: string
- *     responses:
- *       201:
- *         description: Fornecedor cadastrado com sucesso
- */
-router.post('/', (req, res) => {
-  const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body
-  if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
-    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios!' })
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Supplier.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ erro: 'Fornecedor não encontrado!' });
+    res.json(deleted);
+  } catch (err) {
+    res.status(400).json({ erro: 'Erro ao excluir fornecedor' });
   }
+});
 
-  suppliersDB = loadSuppliers()
-  const newSupplier = { 
-    id: uuidv4(), 
-    supplier_name, 
-    supplier_category, 
-    contact_email, 
-    phone_number, 
-    status: status || 'on' 
-  }
-  suppliersDB.push(newSupplier)
-  saveSuppliers()
-  res.status(201).json(newSupplier)
-})
-
-/**
- * @swagger
- * /supplier/{id}:
- *   put:
- *     summary: Atualiza um fornecedor existente
- *     tags: [Fornecedores]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               supplier_name:
- *                 type: string
- *               supplier_category:
- *                 type: string
- *               contact_email:
- *                 type: string
- *               phone_number:
- *                 type: string
- *               status:
- *                 type: string
- *     responses:
- *       200:
- *         description: Fornecedor atualizado com sucesso
- *       404:
- *         description: Fornecedor não encontrado
- */
-router.put('/:id', (req, res) => {
-  const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const index = suppliersDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
-
-  suppliersDB[index] = { ...suppliersDB[index], ...req.body, id }
-  saveSuppliers()
-  res.json(suppliersDB[index])
-})
-
-/**
- * @swagger
- * /supplier/{id}:
- *   delete:
- *     summary: Exclui um fornecedor pelo ID
- *     tags: [Fornecedores]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Fornecedor excluído com sucesso
- *       404:
- *         description: Fornecedor não encontrado
- */
-router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  suppliersDB = loadSuppliers()
-  const index = suppliersDB.findIndex(s => s.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Fornecedor não encontrado!' })
-
-  const deleted = suppliersDB.splice(index, 1)
-  saveSuppliers()
-  res.json(deleted[0])
-})
-
-module.exports = router
+module.exports = router;
