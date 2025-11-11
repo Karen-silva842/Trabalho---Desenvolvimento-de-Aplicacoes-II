@@ -38,7 +38,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /suppliers:
+ * /api/suppliers:
  *   get:
  *     summary: Buscar fornecedores com filtros
  *     tags: [Fornecedores]
@@ -85,7 +85,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /suppliers/{id}:
+ * /api/suppliers/{id}:
  *   get:
  *     summary: Buscar fornecedor por ID
  *     tags: [Fornecedores]
@@ -118,7 +118,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /suppliers:
+ * /api/suppliers:
  *   post:
  *     summary: Criar novo fornecedor
  *     tags: [Fornecedores]
@@ -159,7 +159,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /suppliers/{id}:
+ * /api/suppliers/{id}:
  *   put:
  *     summary: Atualizar fornecedor por ID
  *     tags: [Fornecedores]
@@ -194,7 +194,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /suppliers/{id}:
+ * /api/suppliers/{id}:
  *   delete:
  *     summary: Excluir fornecedor por ID
  *     tags: [Fornecedores]

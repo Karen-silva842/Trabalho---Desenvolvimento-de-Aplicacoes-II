@@ -42,7 +42,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /stores:
+ * /api/stores:
  *   get:
  *     summary: Buscar lojas com filtros
  *     tags: [Lojas]
@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /stores/{id}:
+ * /api/stores/{id}:
  *   get:
  *     summary: Buscar loja por ID
  *     tags: [Lojas]
@@ -122,7 +122,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /stores:
+ * /api/stores:
  *   post:
  *     summary: Criar nova loja
  *     tags: [Lojas]
@@ -156,7 +156,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /stores/{id}:
+ * /api/stores/{id}:
  *   put:
  *     summary: Atualizar loja por ID
  *     tags: [Lojas]
@@ -191,7 +191,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /stores/{id}:
+ * /api/stores/{id}:
  *   delete:
  *     summary: Excluir loja por ID
  *     tags: [Lojas]

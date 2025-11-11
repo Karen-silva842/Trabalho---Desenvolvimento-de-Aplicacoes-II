@@ -61,7 +61,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   get:
  *     summary: Buscar pedidos com filtros
  *     tags: [Pedidos]
@@ -108,7 +108,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   get:
  *     summary: Buscar pedido por ID
  *     tags: [Pedidos]
@@ -141,7 +141,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   post:
  *     summary: Criar novo pedido
  *     tags: [Pedidos]
@@ -169,7 +169,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   put:
  *     summary: Atualizar pedido por ID
  *     tags: [Pedidos]
@@ -204,7 +204,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   delete:
  *     summary: Excluir pedido por ID
  *     tags: [Pedidos]

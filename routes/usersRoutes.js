@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // ✅ MongoDB
+const User = require('../models/User');
 
 router.use(express.json());
 
@@ -42,7 +42,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /users:
+ * /api/users:
  *   get:
  *     summary: Buscar usuários com filtros
  *     tags: [Usuários]
@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /users/all:
+ * /api/users/all:
  *   get:
  *     summary: Buscar todos os usuários
  *     tags: [Usuários]
@@ -114,7 +114,7 @@ router.get('/all', async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   get:
  *     summary: Buscar usuário por ID
  *     tags: [Usuários]
@@ -147,7 +147,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /users:
+ * /api/users:
  *   post:
  *     summary: Criar novo usuário
  *     tags: [Usuários]
@@ -181,7 +181,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   put:
  *     summary: Atualizar usuário por ID
  *     tags: [Usuários]
@@ -222,7 +222,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   delete:
  *     summary: Excluir usuário por ID
  *     tags: [Usuários]

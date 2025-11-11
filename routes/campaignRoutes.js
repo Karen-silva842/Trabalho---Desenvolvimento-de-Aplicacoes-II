@@ -41,7 +41,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /campaigns:
+ * /api/campaigns:
  *   get:
  *     summary: Buscar campanhas com filtros
  *     tags: [Campanhas]
@@ -100,7 +100,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /campaigns/all:
+ * /api/campaigns/all:
  *   get:
  *     summary: Buscar todas as campanhas
  *     tags: [Campanhas]
@@ -125,7 +125,7 @@ router.get('/all', async (req, res) => {
 
 /**
  * @swagger
- * /campaigns/{id}:
+ * /api/campaigns/{id}:
  *   get:
  *     summary: Buscar campanha por ID
  *     tags: [Campanhas]
@@ -158,7 +158,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /campaigns:
+ * /api/campaigns:
  *   post:
  *     summary: Criar nova campanha
  *     tags: [Campanhas]
@@ -186,7 +186,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /campaigns/{id}:
+ * /api/campaigns/{id}:
  *   put:
  *     summary: Atualizar campanha por ID
  *     tags: [Campanhas]
@@ -221,7 +221,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /campaigns/{id}:
+ * /api/campaigns/{id}:
  *   delete:
  *     summary: Excluir campanha por ID
  *     tags: [Campanhas]

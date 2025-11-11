@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product'); // ✅ CORRETO: Product, não Order
+const Product = require('../models/Product');
 
 router.use(express.json());
 
@@ -40,7 +40,7 @@ router.use(express.json());
 
 /**
  * @swagger
- * /products:
+ * /api/products:
  *   get:
  *     summary: Buscar produtos com filtros
  *     tags: [Produtos]
@@ -87,7 +87,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /products/all:
+ * /api/products/all:
  *   get:
  *     summary: Buscar todos os produtos
  *     tags: [Produtos]
@@ -112,7 +112,7 @@ router.get('/all', async (req, res) => {
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   get:
  *     summary: Buscar produto por ID
  *     tags: [Produtos]
@@ -145,7 +145,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /products:
+ * /api/products:
  *   post:
  *     summary: Criar novo produto
  *     tags: [Produtos]
@@ -173,7 +173,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   put:
  *     summary: Atualizar produto por ID
  *     tags: [Produtos]
@@ -208,7 +208,7 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   delete:
  *     summary: Excluir produto por ID
  *     tags: [Produtos]
