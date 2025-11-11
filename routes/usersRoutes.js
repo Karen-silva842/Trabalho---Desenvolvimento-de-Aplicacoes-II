@@ -2,287 +2,92 @@ const express = require('express')
 const router = express.Router()
 const { v4: uuidv4 } = require('uuid')
 const fs = require('fs')
+const path = require('path')
 
-let usersDB = loadUsers()
+// Caminho do arquivo de dados
+const DATA_PATH = path.join(__dirname, '../data/users.json')
 
+// Função para carregar usuários
 function loadUsers() {
   try {
-    return JSON.parse(fs.readFileSync('./data/users.json', 'utf8'))
+    const data = fs.readFileSync(DATA_PATH, 'utf8')
+    return JSON.parse(data)
   } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar usuários', detalhes: err.message });
+    return []
   }
 }
 
-function saveUsers() {
-  try {
-    const users = await User.find();
-    if (users.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' });
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar usuários' });
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' });
-    res.json(user);
-  } catch (err) {
-    console.error('Erro ao salvar usuários:', err)
-    return 'Não salvo'
-  }
+// Função para salvar usuários
+function saveUsers(users) {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(users, null, 2))
 }
 
-/**
- * @swagger
- * tags:
- *   - name: Usuários
- *     description: "Rotas de gerenciamento de usuários - Karen Suélen da Silva"
- *
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *           description: "ID único do usuário"
- *         name:
- *           type: string
- *           description: "Nome completo do usuário"
- *         contact_email:
- *           type: string
- *           description: "E-mail de contato do usuário"
- *         user:
- *           type: string
- *           description: "Login do usuário"
- *         pwd:
- *           type: string
- *           description: "Senha do usuário"
- *         level:
- *           type: string
- *           description: "Nível de acesso (presidente, admin, vendedor)"
- *         status:
- *           type: string
- *           description: "Status do usuário (on/off)"
- *       required:
- *         - id
- *         - name
- *         - contact_email
- *         - user
- *         - pwd
- *         - level
- *         - status
- */
-
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Retorna todos os usuários ou busca por id ou name
- *     tags: [Usuários]
- *     parameters:
- *       - in: query
- *         name: id
- *         schema:
- *           type: string
- *         description: "ID do usuário"
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         description: "Nome do usuário"
- *     responses:
- *       200:
- *         description: Usuário(s) encontrado(s)
- *         content:
- *           application/json:
- *             schema:
- *               oneOf:
- *                 - $ref: '#/components/schemas/User'
- *                 - type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *       404:
- *         description: Usuário não encontrado
- */
+// Buscar todos os usuários ou filtrar por id/name
 router.get('/', (req, res) => {
-  usersDB = loadUsers()
   const { id, name } = req.query
+  let users = loadUsers()
 
-  let results = usersDB
+  if (id) users = users.filter(u => u.id === id)
+  if (name) users = users.filter(u => u.name.toLowerCase().includes(name.toLowerCase()))
 
-  if (id) results = results.filter(u => u.id === id)
-  if (name) results = results.filter(u => u.name.toLowerCase().includes(name.toLowerCase()))
+  if (users.length === 0) return res.status(404).json({ error: 'Usuário não encontrado!' })
 
-  if (results.length === 0) return res.status(404).json({ erro: 'Usuário não encontrado!' })
-
-  res.json(results.length === 1 ? results[0] : results)
+  res.json(users.length === 1 ? users[0] : users)
 })
 
-/**
- * @swagger
- * /users/all:
- *   get:
- *     summary: Retorna todos os usuários cadastrados
- *     tags: [Usuários]
- *     responses:
- *       200:
- *         description: Lista de todos os usuários
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
- *       404:
- *         description: Nenhum usuário encontrado
- */
+// Retornar todos os usuários cadastrados
 router.get('/all', (req, res) => {
-  usersDB = loadUsers()
-  if (usersDB.length === 0) return res.status(404).json({ erro: 'Nenhum usuário encontrado!' })
-  res.json(usersDB)
+  const users = loadUsers()
+  if (users.length === 0) return res.status(404).json({ error: 'Nenhum usuário encontrado!' })
+  res.json(users)
 })
 
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Retorna um usuário específico pelo ID
- *     tags: [Usuários]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: "ID do usuário"
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Usuário encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: Usuário não encontrado
- */
+// Buscar usuário por ID
 router.get('/:id', (req, res) => {
-  const id = req.params.id
-  usersDB = loadUsers()
-  const user = usersDB.find(u => u.id === id)
-  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+  const users = loadUsers()
+  const user = users.find(u => u.id === req.params.id)
+  if (!user) return res.status(404).json({ error: 'Usuário não encontrado!' })
   res.json(user)
 })
 
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Cadastra um novo usuário
- *     tags: [Usuários]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *     responses:
- *       201:
- *         description: Usuário cadastrado com sucesso
- *       400:
- *         description: Campos obrigatórios não preenchidos
- */
+// Criar novo usuário
 router.post('/', (req, res) => {
   const { name, contact_email, user, pwd, level, status } = req.body
   if (!name || !contact_email || !user || !pwd || !level || !status)
-    return res.status(400).json({ erro: 'Preencha todos os campos!' })
+    return res.status(400).json({ error: 'Preencha todos os campos!' })
 
-  usersDB = loadUsers()
+  const users = loadUsers()
   const newUser = { id: uuidv4(), name, contact_email, user, pwd, level, status }
-  usersDB.push(newUser)
-  saveUsers()
+  users.push(newUser)
+  saveUsers(users)
   res.status(201).json(newUser)
 })
 
-/**
- * @swagger
- * /users/{id}:
- *   put:
- *     summary: Atualiza um usuário existente
- *     tags: [Usuários]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: "ID do usuário a ser atualizado"
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *     responses:
- *       200:
- *         description: Usuário atualizado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: Usuário não encontrado
- */
+// Atualizar usuário por ID
 router.put('/:id', (req, res) => {
-  const id = req.params.id
-  usersDB = loadUsers()
-  const index = usersDB.findIndex(u => u.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
-
   const { name, contact_email, user, pwd, level, status } = req.body
   if (!name || !contact_email || !user || !pwd || !level || !status)
-    return res.status(400).json({ erro: 'Campos obrigatórios faltando!' })
+    return res.status(400).json({ error: 'Campos obrigatórios faltando!' })
 
-  const updatedUser = { id, name, contact_email, user, pwd, level, status }
-  usersDB[index] = updatedUser
-  saveUsers()
+  const users = loadUsers()
+  const index = users.findIndex(u => u.id === req.params.id)
+  if (index === -1) return res.status(404).json({ error: 'Usuário não encontrado!' })
+
+  const updatedUser = { id: req.params.id, name, contact_email, user, pwd, level, status }
+  users[index] = updatedUser
+  saveUsers(users)
   res.json(updatedUser)
 })
 
-/**
- * @swagger
- * /users/{id}:
- *   delete:
- *     summary: Remove um usuário existente
- *     tags: [Usuários]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: "ID do usuário a ser removido"
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Usuário removido com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: Usuário não encontrado
- */
+// Excluir usuário por ID
 router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  usersDB = loadUsers()
-  const index = usersDB.findIndex(u => u.id === id)
-  if (index === -1) return res.status(404).json({ erro: 'Usuário não encontrado!' })
+  const users = loadUsers()
+  const index = users.findIndex(u => u.id === req.params.id)
+  if (index === -1) return res.status(404).json({ error: 'Usuário não encontrado!' })
 
-  const deleted = usersDB.splice(index, 1)
-  saveUsers()
+  const deleted = users.splice(index, 1)
+  saveUsers(users)
   res.json(deleted[0])
 })
 
-module.exports = router;
+module.exports = router

@@ -1,67 +1,72 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+const Order = require('../models/Order');
 
+// Middleware para garantir que o corpo da requisição seja interpretado como JSON
+router.use(express.json());
+
+// Buscar pedidos com filtros opcionais (id e date)
 router.get('/', async (req, res) => {
   try {
-    const { id, name } = req.query;
+    const { id, date } = req.query;
+
     if (id) {
-      const p = await Product.findById(id);
-      if (!p) return res.status(404).json({ erro: 'Produto não encontrado!' });
-      return res.json(p);
+      const order = await Order.findById(id);
+      if (!order) return res.status(404).json({ error: 'Pedido não encontrado!' });
+      return res.json(order);
     }
-    if (name) {
-      const results = await Product.find({ name: new RegExp(name, 'i') });
-      return res.json(results);
-    }
-    const products = await Product.find();
-    res.json(products);
+
+    let query = {};
+    if (date) query.date = date;
+
+    const orders = await Order.find(query);
+    res.json(orders);
   } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar produtos', detalhes: err.message });
+    res.status(500).json({ error: 'Erro ao buscar pedidos', details: err.message });
   }
 });
 
+// Buscar pedido por ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ erro: 'Produto não encontrado!' });
-    res.json(product);
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Pedido não encontrado!' });
+    res.json(order);
   } catch (err) {
-    res.status(400).json({ erro: 'ID inválido' });
+    res.status(400).json({ error: 'ID inválido', details: err.message });
   }
 });
 
+// Criar novo pedido
 router.post('/', async (req, res) => {
   try {
-    const { name, description, price, stock_quantity, supplier_id, status } = req.body;
-    if (!name || !description || !price || !stock_quantity || !supplier_id)
-      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios' });
-
-    const novo = new Product({ name, description, price, stock_quantity, supplier_id, status });
-    await novo.save();
-    res.status(201).json(novo);
+    const newOrder = new Order(req.body);
+    await newOrder.save();
+    res.status(201).json(newOrder);
   } catch (err) {
-    res.status(400).json({ erro: 'Erro ao criar produto', detalhes: err.message });
+    res.status(400).json({ error: 'Erro ao criar pedido', details: err.message });
   }
 });
 
+// Atualizar pedido por ID
 router.put('/:id', async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ erro: 'Produto não encontrado!' });
+    const updated = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Pedido não encontrado!' });
     res.json(updated);
   } catch (err) {
-    res.status(400).json({ erro: 'Erro ao atualizar produto', detalhes: err.message });
+    res.status(400).json({ error: 'Erro ao atualizar pedido', details: err.message });
   }
 });
 
+// Excluir pedido por ID
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ erro: 'Produto não encontrado!' });
-    res.json(deleted);
+    const deleted = await Order.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Pedido não encontrado!' });
+    res.json({ message: 'Pedido excluído com sucesso', deleted });
   } catch (err) {
-    res.status(400).json({ erro: 'Erro ao excluir produto' });
+    res.status(400).json({ error: 'Erro ao excluir pedido', details: err.message });
   }
 });
 
