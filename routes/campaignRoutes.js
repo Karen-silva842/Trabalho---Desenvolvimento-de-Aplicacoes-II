@@ -2,10 +2,80 @@ const express = require('express');
 const router = express.Router();
 const Campaign = require('../models/Campaign');
 
-// Middleware para garantir que o corpo da requisição seja JSON
 router.use(express.json());
 
-// Buscar campanhas com filtros opcionais
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Campaign:
+ *       type: object
+ *       required:
+ *         - supplier_id
+ *         - name
+ *         - start_date
+ *         - end_date
+ *         - discount_percentage
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: ID da campanha
+ *         supplier_id:
+ *           type: string
+ *           description: ID do fornecedor
+ *         name:
+ *           type: string
+ *           description: Nome da campanha
+ *         start_date:
+ *           type: string
+ *           format: date-time
+ *           description: Data de início
+ *         end_date:
+ *           type: string
+ *           format: date-time
+ *           description: Data de término
+ *         discount_percentage:
+ *           type: string
+ *           description: Percentual de desconto
+ */
+
+/**
+ * @swagger
+ * /campaigns:
+ *   get:
+ *     summary: Buscar campanhas com filtros
+ *     tags: [Campanhas]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID da campanha
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Nome da campanha
+ *       - in: query
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *         description: Data de início
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *         description: Data de término
+ *     responses:
+ *       200:
+ *         description: Lista de campanhas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
+ */
 router.get('/', async (req, res) => {
   try {
     const { id, name, start_date, end_date } = req.query;
@@ -28,7 +98,22 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Buscar todas as campanhas
+/**
+ * @swagger
+ * /campaigns/all:
+ *   get:
+ *     summary: Buscar todas as campanhas
+ *     tags: [Campanhas]
+ *     responses:
+ *       200:
+ *         description: Todas as campanhas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
+ */
 router.get('/all', async (req, res) => {
   try {
     const campaigns = await Campaign.find();
@@ -38,7 +123,29 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Buscar campanha por ID
+/**
+ * @swagger
+ * /campaigns/{id}:
+ *   get:
+ *     summary: Buscar campanha por ID
+ *     tags: [Campanhas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da campanha
+ *     responses:
+ *       200:
+ *         description: Campanha encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Campaign'
+ *       404:
+ *         description: Campanha não encontrada
+ */
 router.get('/:id', async (req, res) => {
   try {
     const campaign = await Campaign.findById(req.params.id);
@@ -49,7 +156,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Criar nova campanha
+/**
+ * @swagger
+ * /campaigns:
+ *   post:
+ *     summary: Criar nova campanha
+ *     tags: [Campanhas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Campaign'
+ *     responses:
+ *       201:
+ *         description: Campanha criada com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
 router.post('/', async (req, res) => {
   try {
     const campaign = new Campaign(req.body);
@@ -60,7 +184,31 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Atualizar campanha por ID
+/**
+ * @swagger
+ * /campaigns/{id}:
+ *   put:
+ *     summary: Atualizar campanha por ID
+ *     tags: [Campanhas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da campanha
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Campaign'
+ *     responses:
+ *       200:
+ *         description: Campanha atualizada
+ *       404:
+ *         description: Campanha não encontrada
+ */
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Campaign.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -71,7 +219,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Excluir campanha por ID
+/**
+ * @swagger
+ * /campaigns/{id}:
+ *   delete:
+ *     summary: Excluir campanha por ID
+ *     tags: [Campanhas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da campanha
+ *     responses:
+ *       200:
+ *         description: Campanha excluída com sucesso
+ *       404:
+ *         description: Campanha não encontrada
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Campaign.findByIdAndDelete(req.params.id);

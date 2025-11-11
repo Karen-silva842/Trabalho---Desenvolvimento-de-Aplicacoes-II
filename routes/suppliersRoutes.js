@@ -2,10 +2,67 @@ const express = require('express');
 const router = express.Router();
 const Supplier = require('../models/Supplier');
 
-// Middleware para interpretar JSON no corpo da requisição
 router.use(express.json());
 
-// Buscar fornecedores com filtros opcionais (id e supplier_name)
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Supplier:
+ *       type: object
+ *       required:
+ *         - supplier_name
+ *         - supplier_category
+ *         - contact_email
+ *         - phone_number
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: ID do fornecedor
+ *         supplier_name:
+ *           type: string
+ *           description: Nome do fornecedor
+ *         supplier_category:
+ *           type: string
+ *           description: Categoria do fornecedor
+ *         contact_email:
+ *           type: string
+ *           description: E-mail de contato
+ *         phone_number:
+ *           type: string
+ *           description: Telefone
+ *         status:
+ *           type: string
+ *           description: Status do fornecedor (on/off)
+ */
+
+/**
+ * @swagger
+ * /suppliers:
+ *   get:
+ *     summary: Buscar fornecedores com filtros
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *       - in: query
+ *         name: supplier_name
+ *         schema:
+ *           type: string
+ *         description: Nome do fornecedor
+ *     responses:
+ *       200:
+ *         description: Lista de fornecedores
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Supplier'
+ */
 router.get('/', async (req, res) => {
   try {
     const { id, supplier_name } = req.query;
@@ -26,7 +83,29 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Buscar fornecedor por ID
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   get:
+ *     summary: Buscar fornecedor por ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *     responses:
+ *       200:
+ *         description: Fornecedor encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Supplier'
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.get('/:id', async (req, res) => {
   try {
     const supplier = await Supplier.findById(req.params.id);
@@ -37,7 +116,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Criar novo fornecedor
+/**
+ * @swagger
+ * /suppliers:
+ *   post:
+ *     summary: Criar novo fornecedor
+ *     tags: [Fornecedores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Supplier'
+ *     responses:
+ *       201:
+ *         description: Fornecedor criado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
 router.post('/', async (req, res) => {
   try {
     const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body;
@@ -61,7 +157,31 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Atualizar fornecedor por ID
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   put:
+ *     summary: Atualizar fornecedor por ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Supplier'
+ *     responses:
+ *       200:
+ *         description: Fornecedor atualizado
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -72,7 +192,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Excluir fornecedor por ID
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   delete:
+ *     summary: Excluir fornecedor por ID
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *     responses:
+ *       200:
+ *         description: Fornecedor excluído com sucesso
+ *       404:
+ *         description: Fornecedor não encontrado
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Supplier.findByIdAndDelete(req.params.id);

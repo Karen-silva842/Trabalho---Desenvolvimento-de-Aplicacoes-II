@@ -2,10 +2,90 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
-// Middleware para interpretar JSON no corpo da requisição
 router.use(express.json());
 
-// Buscar pedidos com filtros opcionais (id e date)
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     OrderItem:
+ *       type: object
+ *       required:
+ *         - product_id
+ *         - quantity
+ *         - unit_price
+ *       properties:
+ *         product_id:
+ *           type: string
+ *           description: ID do produto
+ *         quantity:
+ *           type: number
+ *           description: Quantidade
+ *         campaign_id:
+ *           type: string
+ *           description: ID da campanha
+ *         unit_price:
+ *           type: string
+ *           description: Preço unitário
+ *     Order:
+ *       type: object
+ *       required:
+ *         - store_id
+ *         - item
+ *         - total_amount
+ *         - status
+ *         - date
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: ID do pedido
+ *         store_id:
+ *           type: string
+ *           description: ID da loja
+ *         item:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *           description: Itens do pedido
+ *         total_amount:
+ *           type: string
+ *           description: Valor total
+ *         status:
+ *           type: string
+ *           description: Status do pedido
+ *         date:
+ *           type: string
+ *           format: date-time
+ *           description: Data do pedido
+ */
+
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: Buscar pedidos com filtros
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID do pedido
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *         description: Data do pedido
+ *     responses:
+ *       200:
+ *         description: Lista de pedidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
 router.get('/', async (req, res) => {
   try {
     const { id, date } = req.query;
@@ -26,7 +106,29 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Buscar pedido por ID (rota específica)
+/**
+ * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Buscar pedido por ID
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do pedido
+ *     responses:
+ *       200:
+ *         description: Pedido encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.get('/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -37,7 +139,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Criar novo pedido
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Criar novo pedido
+ *     tags: [Pedidos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       201:
+ *         description: Pedido criado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
 router.post('/', async (req, res) => {
   try {
     const newOrder = new Order(req.body);
@@ -48,7 +167,31 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Atualizar pedido por ID
+/**
+ * @swagger
+ * /orders/{id}:
+ *   put:
+ *     summary: Atualizar pedido por ID
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do pedido
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       200:
+ *         description: Pedido atualizado
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -59,7 +202,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Excluir pedido por ID
+/**
+ * @swagger
+ * /orders/{id}:
+ *   delete:
+ *     summary: Excluir pedido por ID
+ *     tags: [Pedidos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do pedido
+ *     responses:
+ *       200:
+ *         description: Pedido excluído com sucesso
+ *       404:
+ *         description: Pedido não encontrado
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Order.findByIdAndDelete(req.params.id);
