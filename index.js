@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./routes/swagger'); // ✅ CORRIGIDO
+const swaggerSpec = require('./routes/swagger');
 
 const app = express();
 
@@ -9,11 +9,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Conexão MongoDB com tratamento de erro
-mongoose.connect('mongodb://localhost:27017/central_compras', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// Conexão MongoDB SIMPLIFICADA (sem opções deprecated)
+mongoose.connect('mongodb://localhost:27017/central_compras')
 .then(() => {
   console.log('✅ Conectado ao MongoDB com sucesso!');
 })
@@ -101,12 +98,5 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log('\n🚀 =================================');
-  console.log('   API Central de Compras');
-  console.log('   📁 Arquivo principal: index.js');
-  console.log('   🗄️  MongoDB: Conectado');
-  console.log('   📚 Swagger: http://localhost:' + PORT + '/api-docs');
-  console.log('   🌐 Servidor: http://localhost:' + PORT);
-  console.log('   📊 Health Check: http://localhost:' + PORT + '/health');
-  console.log('=================================\n');
+  console.log('http://localhost:' + PORT + '/api-docs');
 });

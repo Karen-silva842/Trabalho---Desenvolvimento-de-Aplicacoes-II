@@ -45,26 +45,9 @@ const options = {
         description: 'Rotas de gerenciamento de campanhas' 
       },
     ],
-    components: {
-      schemas: {
-        Error: {
-          type: 'object',
-          properties: {
-            error: {
-              type: 'string',
-              description: 'Mensagem de erro'
-            },
-            details: {
-              type: 'string',
-              description: 'Detalhes do erro'
-            }
-          }
-        }
-      }
-    }
   },
-  // Caminho absoluto para os arquivos de rotas
-  apis: [path.join(__dirname, './routes/*.js')],
+  // ✅ CORREÇÃO DEFINITIVA - Procura na MESMA pasta (routes)
+  apis: [path.join(__dirname, '*.js')],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
