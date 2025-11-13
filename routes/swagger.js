@@ -46,7 +46,7 @@ const options = {
       },
     ],
   },
-  // ✅ CORREÇÃO DEFINITIVA - Procura na MESMA pasta (routes)
+  
   apis: [path.join(__dirname, '*.js')],
 };
 
