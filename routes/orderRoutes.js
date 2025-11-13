@@ -63,7 +63,60 @@ router.use(express.json());
  * @swagger
  * /api/orders:
  *   get:
- *     summary: Buscar pedidos com filtros
+ *     summary: Lista todos os pedidos
+ *     tags: [Pedidos]
+ *     responses:
+ *       200:
+ *         description: Lista de pedidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
+router.get('/', async (req, res) => {
+  try {
+    const orders = await Order.find();
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar pedidos', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/orders:
+ *   post:
+ *     summary: Cadastra um novo pedido
+ *     tags: [Pedidos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       201:
+ *         description: Pedido criado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
+router.post('/', async (req, res) => {
+  try {
+    const newOrder = new Order(req.body);
+    await newOrder.save();
+    res.status(201).json(newOrder);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao criar pedido', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/orders/search:
+ *   get:
+ *     summary: Busca pedidos por ID e data
  *     tags: [Pedidos]
  *     parameters:
  *       - in: query
@@ -78,7 +131,7 @@ router.use(express.json());
  *         description: Data do pedido
  *     responses:
  *       200:
- *         description: Lista de pedidos
+ *         description: Pedidos encontrados
  *         content:
  *           application/json:
  *             schema:
@@ -86,18 +139,17 @@ router.use(express.json());
  *               items:
  *                 $ref: '#/components/schemas/Order'
  */
-router.get('/', async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const { id, date } = req.query;
+    let query = {};
 
     if (id) {
-      const order = await Order.findById(id);
-      if (!order) return res.status(404).json({ error: 'Pedido não encontrado!' });
-      return res.json(order);
+      query._id = id;
     }
-
-    let query = {};
-    if (date) query.date = date;
+    if (date) {
+      query.date = date;
+    }
 
     const orders = await Order.find(query);
     res.json(orders);
@@ -110,7 +162,7 @@ router.get('/', async (req, res) => {
  * @swagger
  * /api/orders/{id}:
  *   get:
- *     summary: Buscar pedido por ID
+ *     summary: Retorna um pedido específico pelo ID
  *     tags: [Pedidos]
  *     parameters:
  *       - in: path
@@ -141,37 +193,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/orders:
- *   post:
- *     summary: Criar novo pedido
- *     tags: [Pedidos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Order'
- *     responses:
- *       201:
- *         description: Pedido criado com sucesso
- *       400:
- *         description: Erro na requisição
- */
-router.post('/', async (req, res) => {
-  try {
-    const newOrder = new Order(req.body);
-    await newOrder.save();
-    res.status(201).json(newOrder);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar pedido', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/orders/{id}:
  *   put:
- *     summary: Atualizar pedido por ID
+ *     summary: Atualiza um pedido existente
  *     tags: [Pedidos]
  *     parameters:
  *       - in: path
@@ -206,7 +230,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/orders/{id}:
  *   delete:
- *     summary: Excluir pedido por ID
+ *     summary: Exclui um pedido pelo ID
  *     tags: [Pedidos]
  *     parameters:
  *       - in: path

@@ -42,7 +42,7 @@ const options = {
       },
       { 
         name: 'Campanhas', 
-        description: 'Rotas de gerenciamento de campanhas' 
+        description: 'Rotas de gerenciamento de campanhas - Davi Mendes' 
       },
     ],
   },

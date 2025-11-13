@@ -44,7 +44,7 @@ router.use(express.json());
  * @swagger
  * /api/users:
  *   get:
- *     summary: Buscar usuários com filtros
+ *     summary: Retorna todos os usuários ou busca por id ou name
  *     tags: [Usuários]
  *     parameters:
  *       - in: query
@@ -70,7 +70,6 @@ router.use(express.json());
 router.get('/', async (req, res) => {
   try {
     const { id, name } = req.query;
-
     if (id) {
       const user = await User.findById(id);
       if (!user) return res.status(404).json({ error: 'Usuário não encontrado!' });
@@ -79,7 +78,6 @@ router.get('/', async (req, res) => {
 
     let query = {};
     if (name) query.name = new RegExp(name, 'i');
-
     const users = await User.find(query);
     res.json(users);
   } catch (err) {
@@ -91,7 +89,7 @@ router.get('/', async (req, res) => {
  * @swagger
  * /api/users/all:
  *   get:
- *     summary: Buscar todos os usuários
+ *     summary: Retorna todos os usuários cadastrados
  *     tags: [Usuários]
  *     responses:
  *       200:
@@ -116,7 +114,7 @@ router.get('/all', async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   get:
- *     summary: Buscar usuário por ID
+ *     summary: Retorna um usuário específico pelo ID
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
@@ -149,7 +147,7 @@ router.get('/:id', async (req, res) => {
  * @swagger
  * /api/users:
  *   post:
- *     summary: Criar novo usuário
+ *     summary: Cadastra um novo usuário
  *     tags: [Usuários]
  *     requestBody:
  *       required: true
@@ -183,7 +181,7 @@ router.post('/', async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   put:
- *     summary: Atualizar usuário por ID
+ *     summary: Atualiza um usuário existente
  *     tags: [Usuários]
  *     parameters:
  *       - in: path
@@ -224,7 +222,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   delete:
- *     summary: Excluir usuário por ID
+ *     summary: Remove um usuário existente
  *     tags: [Usuários]
  *     parameters:
  *       - in: path

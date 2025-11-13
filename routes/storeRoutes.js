@@ -44,7 +44,66 @@ router.use(express.json());
  * @swagger
  * /api/stores:
  *   get:
- *     summary: Buscar lojas com filtros
+ *     summary: Retorna todas as lojas cadastradas
+ *     tags: [Lojas]
+ *     responses:
+ *       200:
+ *         description: Lista de lojas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Store'
+ */
+router.get('/', async (req, res) => {
+  try {
+    const stores = await Store.find();
+    res.json(stores);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar lojas', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/stores:
+ *   post:
+ *     summary: Cria uma nova loja
+ *     tags: [Lojas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Store'
+ *     responses:
+ *       201:
+ *         description: Loja criada com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { store_name, cnpj, address, phone_number, contact_email, status } = req.body;
+    
+    if (!store_name || !cnpj || !address || !phone_number || !contact_email || !status) {
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    const newStore = new Store({ store_name, cnpj, address, phone_number, contact_email, status });
+    await newStore.save();
+    res.status(201).json(newStore);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao criar loja', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/stores/search:
+ *   get:
+ *     summary: Busca lojas por ID ou nome
  *     tags: [Lojas]
  *     parameters:
  *       - in: query
@@ -59,7 +118,7 @@ router.use(express.json());
  *         description: Nome da loja
  *     responses:
  *       200:
- *         description: Lista de lojas
+ *         description: Lojas encontradas
  *         content:
  *           application/json:
  *             schema:
@@ -67,18 +126,17 @@ router.use(express.json());
  *               items:
  *                 $ref: '#/components/schemas/Store'
  */
-router.get('/', async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const { id, store_name } = req.query;
+    let query = {};
 
     if (id) {
-      const store = await Store.findById(id);
-      if (!store) return res.status(404).json({ error: 'Loja não encontrada!' });
-      return res.json(store);
+      query._id = id;
     }
-
-    let query = {};
-    if (store_name) query.store_name = new RegExp(store_name, 'i');
+    if (store_name) {
+      query.store_name = new RegExp(store_name, 'i');
+    }
 
     const stores = await Store.find(query);
     res.json(stores);
@@ -91,7 +149,7 @@ router.get('/', async (req, res) => {
  * @swagger
  * /api/stores/{id}:
  *   get:
- *     summary: Buscar loja por ID
+ *     summary: Retorna uma loja específica pelo ID
  *     tags: [Lojas]
  *     parameters:
  *       - in: path
@@ -122,43 +180,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/stores:
- *   post:
- *     summary: Criar nova loja
- *     tags: [Lojas]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Store'
- *     responses:
- *       201:
- *         description: Loja criada com sucesso
- *       400:
- *         description: Erro na requisição
- */
-router.post('/', async (req, res) => {
-  try {
-    const { store_name, cnpj, address, phone_number, contact_email, status } = req.body;
-
-    if (!store_name || !cnpj || !address || !phone_number || !contact_email || !status) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-    }
-
-    const newStore = new Store({ store_name, cnpj, address, phone_number, contact_email, status });
-    await newStore.save();
-    res.status(201).json(newStore);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar loja', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/stores/{id}:
  *   put:
- *     summary: Atualizar loja por ID
+ *     summary: Atualiza uma loja existente
  *     tags: [Lojas]
  *     parameters:
  *       - in: path
@@ -193,7 +217,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/stores/{id}:
  *   delete:
- *     summary: Excluir loja por ID
+ *     summary: Remove uma loja pelo ID
  *     tags: [Lojas]
  *     parameters:
  *       - in: path

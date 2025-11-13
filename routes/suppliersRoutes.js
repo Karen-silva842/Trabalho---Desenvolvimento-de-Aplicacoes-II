@@ -40,7 +40,7 @@ router.use(express.json());
  * @swagger
  * /api/suppliers:
  *   get:
- *     summary: Buscar fornecedores com filtros
+ *     summary: Retorna todos os fornecedores cadastrados
  *     tags: [Fornecedores]
  *     parameters:
  *       - in: query
@@ -66,7 +66,6 @@ router.use(express.json());
 router.get('/', async (req, res) => {
   try {
     const { id, supplier_name } = req.query;
-
     if (id) {
       const supplier = await Supplier.findById(id);
       if (!supplier) return res.status(404).json({ error: 'Fornecedor não encontrado!' });
@@ -75,6 +74,92 @@ router.get('/', async (req, res) => {
 
     let query = {};
     if (supplier_name) query.supplier_name = new RegExp(supplier_name, 'i');
+    const suppliers = await Supplier.find(query);
+    res.json(suppliers);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar fornecedores', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/suppliers:
+ *   post:
+ *     summary: Cadastra um novo fornecedor
+ *     tags: [Fornecedores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Supplier'
+ *     responses:
+ *       201:
+ *         description: Fornecedor criado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body;
+    
+    if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
+      return res.status(400).json({ error: 'Preencha todos os campos obrigatórios!' });
+    }
+
+    const newSupplier = new Supplier({
+      supplier_name,
+      supplier_category,
+      contact_email,
+      phone_number,
+      status: status || 'on'
+    });
+
+    await newSupplier.save();
+    res.status(201).json(newSupplier);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao criar fornecedor', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/suppliers/search:
+ *   get:
+ *     summary: Busca fornecedores por id ou nome
+ *     tags: [Fornecedores]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID do fornecedor
+ *       - in: query
+ *         name: supplier_name
+ *         schema:
+ *           type: string
+ *         description: Nome do fornecedor
+ *     responses:
+ *       200:
+ *         description: Fornecedores encontrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Supplier'
+ */
+router.get('/search', async (req, res) => {
+  try {
+    const { id, supplier_name } = req.query;
+    let query = {};
+
+    if (id) {
+      query._id = id;
+    }
+    if (supplier_name) {
+      query.supplier_name = new RegExp(supplier_name, 'i');
+    }
 
     const suppliers = await Supplier.find(query);
     res.json(suppliers);
@@ -87,7 +172,7 @@ router.get('/', async (req, res) => {
  * @swagger
  * /api/suppliers/{id}:
  *   get:
- *     summary: Buscar fornecedor por ID
+ *     summary: Retorna um fornecedor específico pelo ID
  *     tags: [Fornecedores]
  *     parameters:
  *       - in: path
@@ -118,50 +203,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/suppliers:
- *   post:
- *     summary: Criar novo fornecedor
- *     tags: [Fornecedores]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Supplier'
- *     responses:
- *       201:
- *         description: Fornecedor criado com sucesso
- *       400:
- *         description: Erro na requisição
- */
-router.post('/', async (req, res) => {
-  try {
-    const { supplier_name, supplier_category, contact_email, phone_number, status } = req.body;
-
-    if (!supplier_name || !supplier_category || !contact_email || !phone_number) {
-      return res.status(400).json({ error: 'Preencha todos os campos obrigatórios!' });
-    }
-
-    const newSupplier = new Supplier({
-      supplier_name,
-      supplier_category,
-      contact_email,
-      phone_number,
-      status: status || 'on'
-    });
-
-    await newSupplier.save();
-    res.status(201).json(newSupplier);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar fornecedor', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/suppliers/{id}:
  *   put:
- *     summary: Atualizar fornecedor por ID
+ *     summary: Atualiza um fornecedor existente
  *     tags: [Fornecedores]
  *     parameters:
  *       - in: path
@@ -196,7 +240,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/suppliers/{id}:
  *   delete:
- *     summary: Excluir fornecedor por ID
+ *     summary: Exclui um fornecedor pelo ID
  *     tags: [Fornecedores]
  *     parameters:
  *       - in: path

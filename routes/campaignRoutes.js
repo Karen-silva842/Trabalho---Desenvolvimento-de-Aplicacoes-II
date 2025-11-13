@@ -41,9 +41,34 @@ router.use(express.json());
 
 /**
  * @swagger
+ * /api/campaigns/all:
+ *   get:
+ *     summary: Lista todas as campanhas cadastradas
+ *     tags: [Campanhas]
+ *     responses:
+ *       200:
+ *         description: Lista de campanhas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Campaign'
+ */
+router.get('/all', async (req, res) => {
+  try {
+    const campaigns = await Campaign.find();
+    res.json(campaigns);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar campanhas', details: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/campaigns:
  *   get:
- *     summary: Buscar campanhas com filtros
+ *     summary: Lista campanhas com filtro por ID, nome e datas
  *     tags: [Campanhas]
  *     parameters:
  *       - in: query
@@ -79,7 +104,6 @@ router.use(express.json());
 router.get('/', async (req, res) => {
   try {
     const { id, name, start_date, end_date } = req.query;
-
     if (id) {
       const campaign = await Campaign.findById(id);
       if (!campaign) return res.status(404).json({ error: 'Campanha não encontrada!' });
@@ -100,26 +124,29 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /api/campaigns/all:
- *   get:
- *     summary: Buscar todas as campanhas
+ * /api/campaigns:
+ *   post:
+ *     summary: Cadastra uma nova campanha
  *     tags: [Campanhas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Campaign'
  *     responses:
- *       200:
- *         description: Todas as campanhas
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Campaign'
+ *       201:
+ *         description: Campanha criada com sucesso
+ *       400:
+ *         description: Erro na requisição
  */
-router.get('/all', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const campaigns = await Campaign.find();
-    res.json(campaigns);
+    const campaign = new Campaign(req.body);
+    await campaign.save();
+    res.status(201).json(campaign);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar campanhas', details: err.message });
+    res.status(400).json({ error: 'Erro ao criar campanha', details: err.message });
   }
 });
 
@@ -127,7 +154,7 @@ router.get('/all', async (req, res) => {
  * @swagger
  * /api/campaigns/{id}:
  *   get:
- *     summary: Buscar campanha por ID
+ *     summary: Retorna uma campanha específica pelo ID
  *     tags: [Campanhas]
  *     parameters:
  *       - in: path
@@ -158,37 +185,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/campaigns:
- *   post:
- *     summary: Criar nova campanha
- *     tags: [Campanhas]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Campaign'
- *     responses:
- *       201:
- *         description: Campanha criada com sucesso
- *       400:
- *         description: Erro na requisição
- */
-router.post('/', async (req, res) => {
-  try {
-    const campaign = new Campaign(req.body);
-    await campaign.save();
-    res.status(201).json(campaign);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar campanha', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/campaigns/{id}:
  *   put:
- *     summary: Atualizar campanha por ID
+ *     summary: Atualiza uma campanha existente
  *     tags: [Campanhas]
  *     parameters:
  *       - in: path
@@ -223,7 +222,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/campaigns/{id}:
  *   delete:
- *     summary: Excluir campanha por ID
+ *     summary: Exclui uma campanha pelo ID
  *     tags: [Campanhas]
  *     parameters:
  *       - in: path

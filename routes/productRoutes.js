@@ -42,7 +42,60 @@ router.use(express.json());
  * @swagger
  * /api/products:
  *   get:
- *     summary: Buscar produtos com filtros
+ *     summary: Retorna todos os produtos cadastrados
+ *     tags: [Produtos]
+ *     responses:
+ *       200:
+ *         description: Lista de produtos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ */
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar produtos', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Cadastra um novo produto
+ *     tags: [Produtos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       201:
+ *         description: Produto criado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
+router.post('/', async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json(product);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao criar produto', details: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/products/search:
+ *   get:
+ *     summary: Busca produtos por ID e nome
  *     tags: [Produtos]
  *     parameters:
  *       - in: query
@@ -57,7 +110,7 @@ router.use(express.json());
  *         description: Nome do produto
  *     responses:
  *       200:
- *         description: Lista de produtos
+ *         description: Produtos encontrados
  *         content:
  *           application/json:
  *             schema:
@@ -65,18 +118,17 @@ router.use(express.json());
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-router.get('/', async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const { id, name } = req.query;
+    let query = {};
 
     if (id) {
-      const product = await Product.findById(id);
-      if (!product) return res.status(404).json({ error: 'Produto não encontrado!' });
-      return res.json(product);
+      query._id = id;
     }
-
-    let query = {};
-    if (name) query.name = new RegExp(name, 'i');
+    if (name) {
+      query.name = new RegExp(name, 'i');
+    }
 
     const products = await Product.find(query);
     res.json(products);
@@ -87,34 +139,9 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /api/products/all:
- *   get:
- *     summary: Buscar todos os produtos
- *     tags: [Produtos]
- *     responses:
- *       200:
- *         description: Todos os produtos
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
- */
-router.get('/all', async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar produtos', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/products/{id}:
  *   get:
- *     summary: Buscar produto por ID
+ *     summary: Retorna um produto específico pelo ID
  *     tags: [Produtos]
  *     parameters:
  *       - in: path
@@ -145,37 +172,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/products:
- *   post:
- *     summary: Criar novo produto
- *     tags: [Produtos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Product'
- *     responses:
- *       201:
- *         description: Produto criado com sucesso
- *       400:
- *         description: Erro na requisição
- */
-router.post('/', async (req, res) => {
-  try {
-    const product = new Product(req.body);
-    await product.save();
-    res.status(201).json(product);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar produto', details: err.message });
-  }
-});
-
-/**
- * @swagger
  * /api/products/{id}:
  *   put:
- *     summary: Atualizar produto por ID
+ *     summary: Atualiza um produto existente
  *     tags: [Produtos]
  *     parameters:
  *       - in: path
@@ -210,7 +209,7 @@ router.put('/:id', async (req, res) => {
  * @swagger
  * /api/products/{id}:
  *   delete:
- *     summary: Excluir produto por ID
+ *     summary: Exclui um produto pelo ID
  *     tags: [Produtos]
  *     parameters:
  *       - in: path
